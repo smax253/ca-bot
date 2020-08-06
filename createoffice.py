@@ -1,0 +1,2 @@
+def createOffice(client):
+    return
