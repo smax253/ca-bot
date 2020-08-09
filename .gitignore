@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Google Cloud credentials
+*.json
+
+# IntelliJ
+/.idea
