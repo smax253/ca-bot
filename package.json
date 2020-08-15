@@ -1,0 +1,35 @@
+{
+  "name": "ca-bot",
+  "version": "1.0.0",
+  "description": "Bot to help hold office hours",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "jest",
+    "start": "node -r dotenv/config src/index.js",
+    "lint": "eslint **/*.js --fix",
+    "test:coverage": "jest --coverage",
+    "cleantest": "eslint **/*.js --fix && jest",
+    "test:watch": "jest --watchAll"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/smax253/ca-bot.git"
+  },
+  "author": "Max Shi",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/smax253/ca-bot/issues"
+  },
+  "homepage": "https://github.com/smax253/ca-bot#readme",
+  "dependencies": {
+    "discord.js": "^12.2.0",
+    "dotenv": "^8.2.0",
+    "firebase": "^7.17.2",
+    "firebase-admin": "^9.0.0"
+  },
+  "devDependencies": {
+    "jest": "^26.3.0",
+    "eslint": "^7.6.0",
+    "eslint-plugin-jest": "^23.20.0"
+  }
+}

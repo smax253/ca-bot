@@ -129,12 +129,13 @@ dmypy.json
 .pyre/
 
 # Google Cloud credentials
-*.json
+cloud-perms.json
 
 # IntelliJ
 /.idea
 
 # Node.js
+package-lock.json
 
 # Logs
 logs
