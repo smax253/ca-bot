@@ -1,6 +1,6 @@
+const admin = require('firebase-admin');
 const discord = require('discord.js');
 // const firebase = require('firebase');
-const admin = require('firebase-admin');
 const discordMessageListener = require('./discord_message_listener.js');
 const serviceAccount = require('../cloud-perms.json');
 

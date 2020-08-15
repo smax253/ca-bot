@@ -1,12 +1,12 @@
-const listener = require('./discord_message_listener.js');
-
-jest.mock('./helpers/parse_command.js');
-const parseCommandMock = require('./helpers/parse_command.js');
+const commands = require('./messages');
 
 jest.mock('./helpers/execute_command.js');
 const executeCommandMock = require('./helpers/execute_command.js');
 
-const commands = require('./messages');
+const listener = require('./discord_message_listener.js');
+
+jest.mock('./helpers/parse_command.js');
+const parseCommandMock = require('./helpers/parse_command.js');
 
 describe('discord_message_listener.js', () => {
     let fakeClient;

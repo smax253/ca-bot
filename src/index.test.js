@@ -1,3 +1,5 @@
+const admin = require('firebase-admin');
+
 jest.mock('discord.js', () => {
     return {
         Client: jest.fn().mockImplementation(() => {
@@ -17,7 +19,7 @@ jest.mock('firebase-admin', () => {
         firestore: jest.fn(),
     };
 });
-const admin = require('firebase-admin');
+
 jest.mock('./discord_message_listener.js', () => jest.fn());
 const discordMessageListener = require('./discord_message_listener.js');
 
