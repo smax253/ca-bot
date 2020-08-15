@@ -7,12 +7,12 @@ const discordMessageListener = ({ client, discordKey }) => {
         console.log(`Logged in as ${client.user.tag}`);
     });
     client.on('message', (message) => {
-        const parsedMessage = parseCommand(message);
-        if (!parsedMessage) {
+        const parsedCommand = parseCommand(message);
+        if (!parsedCommand) {
             message.channel.send(messages.UNKNOWN_COMMAND);
         }
         else{
-            executeCommand(parsedMessage);
+            executeCommand(parsedCommand);
         }
     });
     client.login(discordKey);
