@@ -1,4 +1,4 @@
-import discord, collections
+import collections
 
 student_queue = collections.deque()
 
@@ -25,7 +25,7 @@ class QueueEntry(object):
     def toggle_private(self):
         self.is_private = not self.is_private
 
-async def queue(message: discord.Message):
+async def queue(message):
     if QueueEntry(message.author) in student_queue:
         await message.channel.send("You are already in queue!")
         return
