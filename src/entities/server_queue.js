@@ -1,3 +1,4 @@
+const blank_server = require('../constants/blank_server');
 const getDocDataWithId = require('../helpers/get_document_data_with_id');
 
 class ServerQueue {
@@ -25,6 +26,15 @@ class ServerQueue {
                 servers[server.id].groups = server.data.groups;
             }
         });
+    }
+
+    initServer(serverId) {
+        if(this.servers[serverId]) {
+            return false;
+        }
+        this.collectionRef.doc(serverId).set(blank_server);
+        this.getData();
+        return true;
     }
 }
 

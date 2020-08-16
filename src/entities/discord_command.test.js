@@ -1,8 +1,9 @@
 const DiscordCommand = require('./discord_command');
 
 describe('ENTITY: DiscordCommand', () => {
-    let actual, expected;
+    let actual, expected, sendSpy;
     beforeEach(() => {
+        sendSpy = jest.fn();
         expected = {
             content: 'content',
             author: 'author',
@@ -12,6 +13,7 @@ describe('ENTITY: DiscordCommand', () => {
             isCommand: true,
             channel: {
                 guild: 'guild',
+                send: sendSpy,
             },
         };
         actual = new DiscordCommand({
@@ -20,6 +22,7 @@ describe('ENTITY: DiscordCommand', () => {
                 author: 'author',
                 channel: {
                     guild: 'guild',
+                    send: sendSpy,
                 },
             },
             command: 'command',
@@ -29,5 +32,9 @@ describe('ENTITY: DiscordCommand', () => {
     });
     it('creates an entity of the DiscordMessage', () => {
         expect(actual.toObject()).toEqual(expected);
+    });
+    it('creates a wrapper for sending messages', () => {
+        actual.sendMessage('msg');
+        expect(sendSpy).toHaveBeenCalledWith('msg');
     });
 });

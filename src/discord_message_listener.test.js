@@ -16,6 +16,7 @@ describe('discord_message_listener', () => {
             login: jest.fn(),
             user: {
                 tag: 'username',
+                id: 'botId',
             },
         };
         const args = {
@@ -47,35 +48,66 @@ describe('discord_message_listener', () => {
         beforeEach(() => {
             sendSpy = jest.fn();
             parseCommandMock.mockReturnValue(null);
-            message = {
-                content: 'command',
-                channel: {
-                    send: sendSpy,
-                },
-            };
             messageCallback = fakeClient.on.mock.calls.find((call) => call[0] === 'message')[1];
-            messageCallback(message);
         });
-        it('calls command parser', () => {
-            expect(parseCommandMock).toHaveBeenCalledWith(message);
-        });
-        describe('when parsed command is not a command', () => {
+        describe('when message is from the bot', () => {
             beforeEach(() => {
-                parseCommandMock.mockReturnValue(null);
+                parseCommandMock.mockReset();
+                sendSpy.mockReset();
+                executeCommandMock.mockReset();
+                message = {
+                    content: 'command',
+                    channel: {
+                        send: sendSpy,
+                    },
+                    author: fakeClient.user,
+                };
                 messageCallback(message);
             });
-            it('prints not a command message', () => {
-                expect(sendSpy).toHaveBeenCalledWith(commands.UNKNOWN_COMMAND);
+            it('does not call parseCommand', () => {
+                expect(parseCommandMock).not.toHaveBeenCalled();
+            });
+            it('does not call send', () => {
+                expect(sendSpy).not.toHaveBeenCalled();
+            });
+            it('does not call executeCommand', () => {
+                expect(executeCommandMock).not.toHaveBeenCalled();
             });
         });
-        describe('when parsed command is a command', () => {
+        describe('when the message is not from a bot', () => {
             beforeEach(() => {
-                executeCommandMock.mockImplementation(() => {});
-                parseCommandMock.mockReturnValue('command');
+                message = {
+                    content: 'command',
+                    channel: {
+                        send: sendSpy,
+                    },
+                    author: {
+                        id: 'userId',
+                    },
+                };
                 messageCallback(message);
             });
-            it('calls the execute command helper with the message', () => {
-                expect(executeCommandMock).toHaveBeenCalledWith('command');
+            it('calls command parser', () => {
+                expect(parseCommandMock).toHaveBeenCalledWith(message);
+            });
+            describe('when parsed command is not a command', () => {
+                beforeEach(() => {
+                    parseCommandMock.mockReturnValue(null);
+                    messageCallback(message);
+                });
+                it('prints not a command message', () => {
+                    expect(sendSpy).toHaveBeenCalledWith(commands.UNKNOWN_COMMAND);
+                });
+            });
+            describe('when parsed command is a command', () => {
+                beforeEach(() => {
+                    executeCommandMock.mockImplementation(() => {});
+                    parseCommandMock.mockReturnValue('command');
+                    messageCallback(message);
+                });
+                it('calls the execute command helper with the message', () => {
+                    expect(executeCommandMock).toHaveBeenCalledWith('command');
+                });
             });
         });
     });

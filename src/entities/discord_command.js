@@ -11,6 +11,7 @@ const DiscordCommand = function({
     this.getCommand = () => command;
     this.getArgs = () => args;
     this.getIsCommand = () => isCommand;
+    this.sendMessage = (msg) => message.channel.send(msg);
     this.toObject = () => {
         return {
             content: this.getContent(),

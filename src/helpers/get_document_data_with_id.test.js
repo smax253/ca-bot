@@ -1,4 +1,3 @@
-const getDocumentDataWithId = require('./get_document_data_with_id');
 const getDocDataWithId = require('./get_document_data_with_id');
 
 describe('HELPER: get Document Data with ID', () => {
@@ -49,6 +48,17 @@ describe('HELPER: get Document Data with ID', () => {
         });
     });
     describe('on Promise failure', () => {
-
+        beforeEach(() => {
+            console.error = jest.fn();
+            collectionRef.listDocuments.mockReturnValue(
+                new Promise((_, reject) => {
+                    reject('error');
+                }),
+            );
+            getDocDataWithId({ collectionRef, serverQueue });
+        });
+        it('should call console.error with the error', () => {
+            expect(console.error).toHaveBeenCalledWith('error');
+        });
     });
 });

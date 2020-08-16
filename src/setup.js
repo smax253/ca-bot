@@ -12,7 +12,7 @@ const setup = () => {
         credential: admin.credential.cert(serviceAccount),
     });
     const db = admin.firestore();
-    //console.log(admin.firestore());
+    // console.log(admin.firestore());
     const collectionref = db.collection('servers');
     const queue = new ServerQueue(collectionref);
     discordMessageListener({ queue, client, discordKey: process.env.DISCORD_BOT_KEY });
