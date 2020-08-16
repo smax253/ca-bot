@@ -32,9 +32,6 @@ jest.mock('./entities/server_queue', () => {
 });
 const ServerQueue = require('./entities/server_queue');
 
-jest.mock('../cloud-perms.json', () => {
-    return 'perms';
-});
 
 const setup = require('./setup');
 
@@ -44,6 +41,10 @@ describe('setup.js', () => {
         collectionSpy = jest.fn().mockReturnValue('collection');
         admin.firestore.mockReturnValue({ collection: collectionSpy });
         process.env.DISCORD_BOT_KEY = 'discordKey';
+        process.env.GOOGLE_APPLICATION_CREDENTIALS = '../cloud-perms-example.json';
+        jest.mock(process.env.GOOGLE_APPLICATION_CREDENTIALS, () => {
+            return 'perms';
+        });
         admin.credential.cert.mockReturnValue('cert');
         setup();
     });

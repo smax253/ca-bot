@@ -3,13 +3,21 @@
   "version": "1.0.0",
   "description": "Bot to help hold office hours",
   "main": "src/index.js",
+  "jest": {
+    "collectCoverageFrom": [
+      "**/*.js",
+      "!src/index.js",
+      "!/node_modules/"
+    ]
+  },
   "scripts": {
     "test": "jest",
     "start": "node -r dotenv/config src/index.js",
     "lint": "eslint **/*.js --fix",
     "test:coverage": "jest --coverage",
     "cleantest": "eslint **/*.js --fix && jest",
-    "test:watch": "jest --watchAll"
+    "test:watch": "jest --watchAll",
+    "coveralls": "jest --coverage && cat ./coverage/lcov.info | coveralls"
   },
   "repository": {
     "type": "git",
@@ -28,9 +36,10 @@
     "firebase-admin": "^9.0.0"
   },
   "devDependencies": {
+    "coveralls": "^3.1.0",
     "eslint": "^7.6.0",
     "eslint-plugin-jest": "^23.20.0",
     "eslint-plugin-require-sort": "^1.2.1",
-    "jest": "^26.3.0"
+    "jest": "^26.4.0"
   }
 }
