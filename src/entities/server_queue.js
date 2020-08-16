@@ -36,6 +36,17 @@ class ServerQueue {
         this.getData();
         return true;
     }
+
+    queue(serverId, student) {
+        const queue = this.servers[serverId].queue;
+        if (queue.includes(student)) {
+            return false;
+        }
+        else{
+            queue.push(student);
+            return true;
+        }
+    }
 }
 
 module.exports = ServerQueue;

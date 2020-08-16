@@ -131,4 +131,48 @@ describe('ENTITY: ServerQueue', () => {
             });
         });
     });
+    describe('queue()', () => {
+        describe('when student is already in queue', () => {
+            let result;
+            beforeEach(() => {
+                instance.servers = {
+                    serverId1: {
+                        queue: ['student1', 'student2'],
+                    },
+                };
+                result = instance.queue('serverId1', 'student1');
+            });
+            it('should not modify the queue', () => {
+                expect(instance.servers).toEqual({
+                    serverId1: {
+                        queue: ['student1', 'student2'],
+                    },
+                });
+            });
+            it('should return false', () => {
+                expect(result).toEqual(false);
+            });
+        });
+        describe('when student is not in queue', () => {
+            let result;
+            beforeEach(() => {
+                instance.servers = {
+                    serverId1: {
+                        queue: ['student1', 'student2'],
+                    },
+                };
+                result = instance.queue('serverId1', 'student3');
+            });
+            it('should put the student in the back of the queue', () => {
+                expect(instance.servers).toEqual({
+                    serverId1: {
+                        queue: ['student1', 'student2', 'student3'],
+                    },
+                });
+            });
+            it('should return true', () => {
+                expect(result).toEqual(true);
+            });
+        });
+    });
 });
