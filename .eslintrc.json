@@ -7,7 +7,6 @@
   "parserOptions": {
     "ecmaVersion": 2019
   },
-  "plugins": ["require-sort"],
   "rules": {
     "brace-style": ["error", "stroustrup", { "allowSingleLine": true }],
     "comma-dangle": ["error", "always-multiline"],
@@ -31,9 +30,6 @@
     "object-curly-spacing": ["error", "always"],
     "prefer-const": "error",
     "quotes": ["error", "single"],
-    "require-sort/require-sort": ["error", {
-      "ignoreCase": true
-    }],
     "semi": ["error", "always"],
     "sort-imports": ["error"],
     "space-before-blocks": "error",

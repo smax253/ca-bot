@@ -1,5 +1,5 @@
 const executeCommand = require('./helpers/execute_command');
-const messages = require('./messages');
+const messages = require('./locale/messages');
 const parseCommand = require('./helpers/parse_command');
 
 const discordMessageListener = ({ client, discordKey }) => {
@@ -9,11 +9,10 @@ const discordMessageListener = ({ client, discordKey }) => {
     client.on('message', (message) => {
         if (message.author.id === client.user.id) return;
         const parsedCommand = parseCommand(message);
-        if (!parsedCommand) {
-            message.channel.send(messages.UNKNOWN_COMMAND);
-        }
-        else{
-            executeCommand(parsedCommand);
+        if (parsedCommand) {
+            parsedCommand.getIsCommand()
+                ? executeCommand(parsedCommand)
+                : message.channel.send(messages.UNKNOWN_COMMAND);
         }
     });
     client.login(discordKey);

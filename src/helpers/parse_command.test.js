@@ -1,4 +1,5 @@
 const parseCommand = require('./parse_command');
+
 jest.mock('../entities/discord_command', () => {
     return jest.fn().mockImplementation((args) => {
         return {
@@ -7,43 +8,68 @@ jest.mock('../entities/discord_command', () => {
     });
 });
 
+jest.mock('../locale/commands', () => {
+    return {
+        commands: {
+            queue: 'queue',
+        },
+        prefix: '!',
+    };
+});
+
 describe('HELPER: Extract command from message body', () => {
     let expected, actual, message;
-    describe('when message is a command', () => {
-        beforeEach(() => {
-            expected = {
-                isCommand: true,
-            };
+    describe('when message begins with the command prefix', () => {
+        describe('when message is a valid command', () => {
+            beforeEach(() => {
+                expected = {
+                    isCommand: true,
+                };
+            });
+            describe('when the message has command and no arguments', () => {
+                beforeEach(() => {
+                    message = {
+                        content: '!queue',
+                    };
+                    expected.message = message;
+                    expected.command = 'queue';
+                    actual = parseCommand(
+                        message,
+                    );
+                });
+                it('should return an object representing the command', () => {
+                    expect(actual).toEqual(expected);
+                });
+            });
+            describe('when the message has command and some arguments', () => {
+                beforeEach(() => {
+                    message = {
+                        content: '!queue private',
+                    };
+                    expected.message = message;
+                    expected.command = 'queue';
+                    expected.args = 'private';
+                    actual = parseCommand(
+                        message,
+                    );
+                });
+                it('should return an object representing the command', () => {
+                    expect(actual).toEqual(expected);
+                });
+            });
         });
-        describe('when the message has command and no arguments', () => {
+        describe('when message is not a valid command', () => {
             beforeEach(() => {
                 message = {
-                    content: '!queue',
+                    content: '!nocommand',
                 };
-                expected.message = message;
-                expected.command = '!queue';
-                expected.args = '';
-                actual = parseCommand(
-                    message,
-                );
-            });
-            it('should return an object representing the command', () => {
-                expect(actual).toEqual(expected);
-            });
-        });
-        describe('when the message has command and some arguments', () => {
-            beforeEach(() => {
-                message = {
-                    content: '!queue private',
+                expected = {
+                    isCommand: false,
+                    message: message,
                 };
-                expected.message = message;
-                expected.command = '!queue';
-                expected.args = 'private';
-                actual = parseCommand(
-                    message,
-                );
+                actual = parseCommand(message);
             });
-            it('should return an object representing the command', () => {
+            it('should return an object representing the invalid command', () => {
                 expect(actual).toEqual(expected);
             });
         });

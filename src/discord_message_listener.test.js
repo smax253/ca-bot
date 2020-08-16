@@ -1,4 +1,12 @@
-const commands = require('./messages');
+jest.mock('./locale/commands', () => {
+    return {
+        commands: {
+            queue: 'queue',
+        },
+        prefix: '!',
+    };
+});
+const commands = require('./locale/messages');
 
 jest.mock('./helpers/execute_command');
 const executeCommandMock = require('./helpers/execute_command');
@@ -90,9 +98,20 @@ describe('discord_message_listener', () => {
             it('calls command parser', () => {
                 expect(parseCommandMock).toHaveBeenCalledWith(message);
             });
-            describe('when parsed command is not a command', () => {
+            describe('when parsed command is null', () => {
                 beforeEach(() => {
                     parseCommandMock.mockReturnValue(null);
+                    messageCallback(message);
+                });
+                it('does not send a message', () => {
+                    expect(sendSpy).not.toHaveBeenCalled();
+                });
+            });
+            describe('when parsed command is not a command', () => {
+                beforeEach(() => {
+                    parseCommandMock.mockReturnValue({
+                        getIsCommand: jest.fn().mockReturnValue(false),
+                    });
                     messageCallback(message);
                 });
                 it('prints not a command message', () => {
@@ -100,13 +119,19 @@ describe('discord_message_listener', () => {
                 });
             });
             describe('when parsed command is a command', () => {
+                let command;
                 beforeEach(() => {
+                    command = {
+                        getIsCommand: jest.fn().mockReturnValue(true),
+                    };
                     executeCommandMock.mockImplementation(() => {});
-                    parseCommandMock.mockReturnValue('command');
+                    parseCommandMock.mockReturnValue(
+                        command,
+                    );
                     messageCallback(message);
                 });
                 it('calls the execute command helper with the message', () => {
-                    expect(executeCommandMock).toHaveBeenCalledWith('command');
+                    expect(executeCommandMock).toHaveBeenCalledWith(command);
                 });
             });
         });

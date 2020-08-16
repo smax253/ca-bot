@@ -1,5 +1,5 @@
 const executeCommand = require('./execute_command');
-const messages = require('../messages');
+const messages = require('../locale/messages');
 
 describe('HELPER: executeCommand', () => {
     let serverQueue, discordCommand;
@@ -16,9 +16,9 @@ describe('HELPER: executeCommand', () => {
             getAuthor: jest.fn().mockReturnValue('student'),
         };
     });
-    describe('when command is !init', () => {
+    describe('when command is init', () => {
         beforeEach(() => {
-            discordCommand.getCommand = jest.fn().mockReturnValue('!init');
+            discordCommand.getCommand = jest.fn().mockReturnValue('init');
             executeCommand({
                 serverQueue, discordCommand,
             });
@@ -52,75 +52,39 @@ describe('HELPER: executeCommand', () => {
             });
         });
     });
-    describe('when command is !queue or !q', () => {
+
+    describe('when command is !queue', () => {
         beforeEach(() => {
-            discordCommand.sendMessage.mockReset();
+            discordCommand.getCommand = jest.fn().mockReturnValue('queue');
+            executeCommand({
+                serverQueue, discordCommand,
+            });
         });
-        describe('when command is !queue', () => {
+        it('should call serverQueue.queue with the serverId and student', () => {
+            expect(serverQueue.queue).toHaveBeenCalledWith('serverId', 'student');
+        });
+        describe('when queue returns false', () => {
             beforeEach(() => {
-                discordCommand.getCommand = jest.fn().mockReturnValue('!queue');
+                serverQueue.queue.mockReturnValue(false);
                 executeCommand({
                     serverQueue, discordCommand,
                 });
             });
-            it('should call serverQueue.queue with the serverId and student', () => {
-                expect(serverQueue.queue).toHaveBeenCalledWith('serverId', 'student');
-            });
-            describe('when queue returns false', () => {
-                beforeEach(() => {
-                    serverQueue.queue.mockReturnValue(false);
-                    executeCommand({
-                        serverQueue, discordCommand,
-                    });
-                });
-                it('should send a message that says the user is already in queue', () => {
-                    expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.QUEUE_ALREADY_QUEUED);
-                });
-            });
-            describe('when queue returns true', () => {
-                beforeEach(() => {
-                    serverQueue.queue.mockReturnValue(true);
-                    executeCommand({
-                        serverQueue, discordCommand,
-                    });
-                });
-                it('should send a message that says the user is already in queue', () => {
-                    expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.QUEUE_SUCCESS);
-                });
+            it('should send a message that says the user is already in queue', () => {
+                expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.QUEUE_ALREADY_QUEUED);
             });
         });
-        describe('when command is !q', () => {
+        describe('when queue returns true', () => {
             beforeEach(() => {
-                discordCommand.getCommand = jest.fn().mockReturnValue('!q');
+                serverQueue.queue.mockReturnValue(true);
                 executeCommand({
                     serverQueue, discordCommand,
                 });
             });
-            it('should call serverQueue.queue with the serverId and student', () => {
-                expect(serverQueue.queue).toHaveBeenCalledWith('serverId', 'student');
-            });
-            describe('when queue returns false', () => {
-                beforeEach(() => {
-                    serverQueue.queue.mockReturnValue(false);
-                    executeCommand({
-                        serverQueue, discordCommand,
-                    });
-                });
-                it('should send a message that says the user is already in queue', () => {
-                    expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.QUEUE_ALREADY_QUEUED);
-                });
-            });
-            describe('when queue returns true', () => {
-                beforeEach(() => {
-                    serverQueue.queue.mockReturnValue(true);
-                    executeCommand({
-                        serverQueue, discordCommand,
-                    });
-                });
-                it('should send a message that says the user is already in queue', () => {
-                    expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.QUEUE_SUCCESS);
-                });
+            it('should send a message that says the user is already in queue', () => {
+                expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.QUEUE_SUCCESS);
             });
         });
     });
+
 });

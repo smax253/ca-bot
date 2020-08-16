@@ -1,11 +1,14 @@
 const DiscordCommand = require('../entities/discord_command');
+const commands = require('../locale/commands');
 const parseCommand = (message) => {
     const content = message.content;
-    const isCommand = content.startsWith('!');
-    if (isCommand) {
+    const isPossibleCommand = content.startsWith(commands.prefix);
+    if (isPossibleCommand) {
         const split = content.split(' ');
-        const command = split[0];
-        const args = split.slice(1).join(' ');
+        const command = commands.commands[split[0].substring(commands.prefix.length)];
+        const isCommand = !!command;
+        let args = split.slice(1).join(' ');
+        args = args ? args : undefined;
         return new DiscordCommand({
             message, isCommand, command, args,
         });
