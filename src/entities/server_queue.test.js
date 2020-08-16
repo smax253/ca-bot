@@ -1,4 +1,4 @@
-const ServerQueue = require('./server_queue.js');
+const ServerQueue = require('./server_queue');
 describe('ENTITY: ServerQueue', () => {
 
 });

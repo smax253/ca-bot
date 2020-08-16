@@ -1,5 +1,5 @@
 const executeCommand = require('./helpers/execute_command');
-const messages = require('./messages.js');
+const messages = require('./messages');
 const parseCommand = require('./helpers/parse_command');
 
 const discordMessageListener = ({ client, discordKey }) => {

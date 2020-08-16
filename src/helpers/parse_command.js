@@ -1,4 +1,4 @@
-const DiscordCommand = require('../entities/discord_command.js');
+const DiscordCommand = require('../entities/discord_command');
 const parseCommand = (message) => {
     const content = message.content;
     const isCommand = content.startsWith('!');

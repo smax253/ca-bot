@@ -1,4 +1,4 @@
-const getDocDataWithId = require('../helpers/get_document_data_with_id.js');
+const getDocDataWithId = require('../helpers/get_document_data_with_id');
 
 class ServerQueue {
     constructor(collectionRef) {

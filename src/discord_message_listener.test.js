@@ -1,14 +1,14 @@
 const commands = require('./messages');
 
-jest.mock('./helpers/execute_command.js');
-const executeCommandMock = require('./helpers/execute_command.js');
+jest.mock('./helpers/execute_command');
+const executeCommandMock = require('./helpers/execute_command');
 
-const listener = require('./discord_message_listener.js');
+const listener = require('./discord_message_listener');
 
-jest.mock('./helpers/parse_command.js');
-const parseCommandMock = require('./helpers/parse_command.js');
+jest.mock('./helpers/parse_command');
+const parseCommandMock = require('./helpers/parse_command');
 
-describe('discord_message_listener.js', () => {
+describe('discord_message_listener', () => {
     let fakeClient;
     beforeEach(() => {
         fakeClient = {

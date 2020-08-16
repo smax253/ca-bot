@@ -1,5 +1,5 @@
-const parseCommand = require('./parse_command.js');
-jest.mock('../entities/discord_command.js', () => {
+const parseCommand = require('./parse_command');
+jest.mock('../entities/discord_command', () => {
     return jest.fn().mockImplementation((args) => {
         return {
             ...args,

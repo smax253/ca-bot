@@ -1,5 +1,5 @@
-const getDocumentDataWithId = require('./get_document_data_with_id.js');
-const getDocDataWithId = require('./get_document_data_with_id.js');
+const getDocumentDataWithId = require('./get_document_data_with_id');
+const getDocDataWithId = require('./get_document_data_with_id');
 
 describe('HELPER: get Document Data with ID', () => {
     let collectionRef, serverQueue;

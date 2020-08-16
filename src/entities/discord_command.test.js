@@ -1,4 +1,4 @@
-const DiscordCommand = require('./discord_command.js');
+const DiscordCommand = require('./discord_command');
 
 describe('ENTITY: DiscordCommand', () => {
     let actual, expected;
