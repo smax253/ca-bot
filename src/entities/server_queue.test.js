@@ -37,37 +37,37 @@ describe('ENTITY: ServerQueue', () => {
         });
     });
     describe('updateData', () => {
-        describe('there is data of existing servers', () => {
-            beforeEach(() => {
-                instance.servers = {
-                    serverId1: {
-                        queue: ['queue1', 'queue2'],
-                        admin_roles: ['admin1', 'admin2'],
+        beforeEach(() => {
+            instance.servers = {
+                serverId1: {
+                    queue: ['queue1', 'queue2'],
+                    admin_roles: ['admin1', 'admin2'],
+                    groups: {
+                        private: 'private',
+                    },
+                },
+            };
+            instance.updateData([
+                {
+                    id: 'serverId1',
+                    data: {
+                        admin_roles: ['admin1'],
                         groups: {
-                            private: 'private',
+                            private: 'newPrivate',
                         },
                     },
-                };
-                instance.updateData([
-                    {
-                        id: 'serverId1',
-                        data: {
-                            admin_roles: ['admin1'],
-                            groups: {
-                                private: 'newprivate',
-                            },
-                        },
-                    },
-                ]);
+                },
+            ]);
+        });
+        it('updates admin_roles', () => {
+            expect(instance.servers.serverId1.admin_roles).toEqual(['admin1']);
+        });
+        it('updates groups', () => {
+            expect(instance.servers.serverId1.groups).toEqual({
+                private: 'newPrivate',
             });
-            it('updates admin_roles', () => {
-                expect(instance.servers.serverId1.admin_roles).toEqual(['admin1']);
-            });
-            it('updates groups', () => {
-                expect(instance.servers.serverId1.groups).toEqual({
-                    private: 'newprivate',
-                });
-            });
+        });
+        describe('there is data of existing servers', () => {
             it('does NOT update queue', () => {
                 expect(instance.servers.serverId1.queue).toEqual(['queue1', 'queue2']);
             });
@@ -86,14 +86,6 @@ describe('ENTITY: ServerQueue', () => {
                         },
                     },
                 ]);
-            });
-            it('updates admin_roles', () => {
-                expect(instance.servers.serverId1.admin_roles).toEqual(['admin1']);
-            });
-            it('updates groups', () => {
-                expect(instance.servers.serverId1.groups).toEqual({
-                    private: 'newprivate',
-                });
             });
             it('creates new empty queue', () => {
                 expect(instance.servers.serverId1.queue).toEqual([]);
@@ -132,14 +124,16 @@ describe('ENTITY: ServerQueue', () => {
         });
     });
     describe('queue()', () => {
+        beforeEach(() => {
+            instance.servers = {
+                serverId1: {
+                    queue: ['student1', 'student2'],
+                },
+            };
+        });
         describe('when student is already in queue', () => {
             let result;
             beforeEach(() => {
-                instance.servers = {
-                    serverId1: {
-                        queue: ['student1', 'student2'],
-                    },
-                };
                 result = instance.queue('serverId1', 'student1');
             });
             it('should not modify the queue', () => {
@@ -156,11 +150,6 @@ describe('ENTITY: ServerQueue', () => {
         describe('when student is not in queue', () => {
             let result;
             beforeEach(() => {
-                instance.servers = {
-                    serverId1: {
-                        queue: ['student1', 'student2'],
-                    },
-                };
                 result = instance.queue('serverId1', 'student3');
             });
             it('should put the student in the back of the queue', () => {
