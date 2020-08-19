@@ -6,7 +6,9 @@ const DiscordCommand = function({
 }) {
     this.getContent = () => message.content;
     this.getAuthor = () => message.author;
+    this.getAuthorId = () => message.author.id;
     this.getServer = () => message.channel.guild;
+    this.getServerId = () => message.channel.guild.id;
     this.getChannel = () => message.channel;
     this.getCommand = () => command;
     this.getArgs = () => args;
@@ -21,6 +23,8 @@ const DiscordCommand = function({
             args: this.getArgs(),
             isCommand: this.getIsCommand(),
             channel: this.getChannel(),
+            serverId: this.getServerId(),
+            authorId: this.getAuthorId(),
         };
     };
 };

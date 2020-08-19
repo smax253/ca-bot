@@ -1,5 +1,6 @@
 const blank_server = require('../constants/blank_server');
 const getDocDataWithId = require('../helpers/get_document_data_with_id');
+const matchStudentIds = require('../helpers/match_student_ids');
 
 class ServerQueue {
     constructor(collectionRef) {
@@ -39,11 +40,29 @@ class ServerQueue {
 
     queue(serverId, student) {
         const queue = this.servers[serverId].queue;
-        if (queue.includes(student)) {
+        if (queue.find(matchStudentIds(student))) {
             return false;
         }
         else{
             queue.push(student);
+            return true;
+        }
+    }
+
+    dequeue(serverId) {
+        const queue = this.servers[serverId].queue;
+        if(queue.length === 0) return null;
+        else return queue.shift();
+    }
+
+    remove(serverId, student) {
+        const queue = this.servers[serverId].queue;
+        const ind = queue.findIndex(matchStudentIds(student));
+        if (ind < 0) {
+            return false;
+        }
+        else{
+            queue.splice(ind, 1);
             return true;
         }
     }
