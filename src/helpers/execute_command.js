@@ -1,5 +1,5 @@
 const messages = require('../locale/messages');
-const isAuthorized = require('./is_authorized');
+const runAuthorizedCommand = require('./run_authorized_command');
 
 const executeCommand = ({
     serverQueue,
@@ -8,25 +8,25 @@ const executeCommand = ({
     const command = discordCommand.getCommand();
     switch(command) {
     case 'init':
-        isAuthorized({ serverQueue, discordCommand })
-            ? serverQueue.initServer(discordCommand.getServerId())
+        runAuthorizedCommand({ serverQueue, discordCommand }, () => {
+            serverQueue.initServer(discordCommand.getServerId())
                 ? discordCommand.sendMessage(messages.INITIALIZATION_SUCCESS)
-                : discordCommand.sendMessage(messages.INITIALIZATION_ALREADY_EXISTS)
-            : discordCommand.sendMessage(messages.NOT_AUTHORIZED);
+                : discordCommand.sendMessage(messages.INITIALIZATION_ALREADY_EXISTS);
+        });
         break;
     case 'addadmin':
-        isAuthorized({ serverQueue, discordCommand })
-            ? serverQueue.addAdmin(discordCommand.getServerId(), discordCommand.getArgs())
+        runAuthorizedCommand({ serverQueue, discordCommand }, () => {
+            serverQueue.addAdmin(discordCommand.getServerId(), discordCommand.getArgs())
                 ? discordCommand.sendMessage(messages.ADMIN_ADDED)
-                : discordCommand.sendMessage(messages.ADMIN_ALREADY_ADDED)
-            : discordCommand.sendMessage(messages.NOT_AUTHORIZED);
+                : discordCommand.sendMessage(messages.ADMIN_ALREADY_ADDED);
+        });
         break;
     case 'removeadmin':
-        isAuthorized({ serverQueue, discordCommand })
-            ? serverQueue.removeAdmin(discordCommand.getServerId(), discordCommand.getArgs())
+        runAuthorizedCommand({ serverQueue, discordCommand }, () => {
+            serverQueue.removeAdmin(discordCommand.getServerId(), discordCommand.getArgs())
                 ? discordCommand.sendMessage(messages.ADMIN_REMOVED)
-                : discordCommand.sendMessage(messages.ADMIN_NOT_FOUND)
-            : discordCommand.sendMessage(messages.NOT_AUTHORIZED);
+                : discordCommand.sendMessage(messages.ADMIN_NOT_FOUND);
+        });
         break;
     case 'queue':
         serverQueue.queue(discordCommand.getServerId(), discordCommand.getAuthor())
