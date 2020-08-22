@@ -17,7 +17,7 @@
     "lint": "eslint **/*.js --fix",
     "test:coverage": "jest --coverage",
     "cleantest": "eslint **/*.js --fix && jest",
-    "test:watch": "jest --watchAll",
+    "test:watch": "jest --watchAll --maxWorkers=30%",
     "coveralls": "jest --coverage && cat ./coverage/lcov.info | coveralls"
   },
   "repository": {

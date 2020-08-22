@@ -14,6 +14,8 @@ const DiscordCommand = function({
     this.getArgs = () => args;
     this.getIsCommand = () => isCommand;
     this.sendMessage = (msg) => message.channel.send(msg);
+    this.getRoles = () => message.member.roles;
+    this.getOwnerId = () => message.channel.guild.ownerID;
     this.toObject = () => {
         return {
             content: this.getContent(),
@@ -25,6 +27,8 @@ const DiscordCommand = function({
             channel: this.getChannel(),
             serverId: this.getServerId(),
             authorId: this.getAuthorId(),
+            roles: this.getRoles(),
+            ownerId: this.getOwnerId(),
         };
     };
 };

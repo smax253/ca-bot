@@ -44,11 +44,11 @@ describe('HELPER: Extract command from message body', () => {
             describe('when the message has command and some arguments', () => {
                 beforeEach(() => {
                     message = {
-                        content: '!queue private',
+                        content: '!queue role name',
                     };
                     expected.message = message;
                     expected.command = 'queue';
-                    expected.args = 'private';
+                    expected.args = 'role name';
                     actual = parseCommand(
                         message,
                     );

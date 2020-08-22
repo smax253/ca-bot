@@ -123,6 +123,108 @@ describe('ENTITY: ServerQueue', () => {
             });
         });
     });
+    describe('isAdmin()', () => {
+        let result;
+        beforeEach(() => {
+            instance.servers = {
+                serverId1: {
+                    queue: ['queue1', 'queue2'],
+                    admin_roles: ['admin1', 'admin2'],
+                    groups: {
+                        private: 'private',
+                    },
+                },
+            };
+        });
+        describe('when the role list does not have one of the roles in the admin list', () => {
+            beforeEach(() => {
+                result = instance.isAdmin('serverId1', ['role1', 'role2', 'role3']);
+            });
+            it('should return false', () => {
+                expect(result).toEqual(false);
+            });
+        });
+        describe('when the role list has one of hte roles in the admin list', () => {
+            beforeEach(() => {
+                result = instance.isAdmin('serverId1', ['role1', 'admin1', 'role3']);
+            });
+            it('should return true', () => {
+                expect(result).toEqual(true);
+            });
+        });
+    });
+    describe('addAdmin()', () => {
+        let result;
+        beforeEach(() => {
+            instance.servers = {
+                serverId1: {
+                    queue: ['queue1', 'queue2'],
+                    admin_roles: ['admin1', 'admin2'],
+                    groups: {
+                        private: 'private',
+                    },
+                },
+            };
+        });
+        describe('when role is not an admin', () => {
+            beforeEach(() => {
+                result = instance.addAdmin('serverId1', 'admin3');
+            });
+            it('adds the role to the list of admins', () => {
+                expect(instance.servers.serverId1.admin_roles.includes('admin3')).toEqual(true);
+            });
+            it('returns true', () => {
+                expect(result).toEqual(true);
+            });
+        });
+        describe('when role is already an admin', () => {
+            beforeEach(() => {
+                result = instance.addAdmin('serverId1', 'admin1');
+            });
+            it('does not change the list of admins', () => {
+                expect(instance.servers.serverId1.admin_roles).toEqual(['admin1', 'admin2']);
+            });
+            it('returns false', () => {
+                expect(result).toEqual(false);
+            });
+        });
+    });
+    describe('removeAdmin()', () => {
+        let result;
+        beforeEach(() => {
+            instance.servers = {
+                serverId1: {
+                    queue: ['queue1', 'queue2'],
+                    admin_roles: ['admin1', 'admin2'],
+                    groups: {
+                        private: 'private',
+                    },
+                },
+            };
+        });
+        describe('when role is an admin', () => {
+            beforeEach(() => {
+                result = instance.removeAdmin('serverId1', 'admin1');
+            });
+            it('removes the role from the list of admins', () => {
+                expect(instance.servers.serverId1.admin_roles.includes('admin1')).toEqual(false);
+            });
+            it('returns true', () => {
+                expect(result).toEqual(true);
+            });
+        });
+        describe('when role is not an admin', () => {
+            beforeEach(() => {
+                result = instance.removeAdmin('serverId1', 'admin3');
+            });
+            it('does not change the list of admins', () => {
+                expect(instance.servers.serverId1.admin_roles).toEqual(['admin1', 'admin2']);
+            });
+            it('returns false', () => {
+                expect(result).toEqual(false);
+            });
+        });
+    });
     describe('queue related operations', () => {
         beforeEach(() => {
             instance.servers = {

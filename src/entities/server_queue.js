@@ -66,6 +66,28 @@ class ServerQueue {
             return true;
         }
     }
+    isAdmin(serverId, roleList) {
+        const server = this.servers[serverId];
+        const is_admin = server.admin_roles.map((role) => roleList.includes(role)).includes(true);
+        return is_admin;
+    }
+    addAdmin(serverId, role) {
+        const server = this.servers[serverId];
+        if (server.admin_roles.includes(role)) return false;
+        server.admin_roles.push(role);
+        return true;
+    }
+    removeAdmin(serverId, role) {
+        const server = this.servers[serverId];
+        const ind = server.admin_roles.indexOf(role);
+        if (ind < 0) {
+            return false;
+        }
+        else{
+            server.admin_roles.splice(ind, 1);
+            return true;
+        }
+    }
 }
 
 module.exports = ServerQueue;

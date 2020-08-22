@@ -1,5 +1,7 @@
 const executeCommand = require('./execute_command');
 const messages = require('../locale/messages');
+jest.mock('./is_authorized');
+const isAuthorized = require('./is_authorized');
 
 describe('HELPER: executeCommand', () => {
     let serverQueue, discordCommand;
@@ -9,12 +11,15 @@ describe('HELPER: executeCommand', () => {
             queue: jest.fn(),
             dequeue: jest.fn(),
             remove: jest.fn(),
+            addAdmin: jest.fn(),
+            removeAdmin: jest.fn(),
         };
         discordCommand = {
             getServer: jest.fn(),
             getServerId: jest.fn().mockReturnValue('serverId'),
             sendMessage: jest.fn(),
             getAuthor: jest.fn().mockReturnValue('student'),
+            getArgs: jest.fn(),
         };
     });
     describe('when command is init', () => {
@@ -24,32 +29,166 @@ describe('HELPER: executeCommand', () => {
                 serverQueue, discordCommand,
             });
         });
-        it('should call discordCommand.getServerId to get the server ID', () => {
-            expect(discordCommand.getServerId).toHaveBeenCalled();
+        it('should call isAuthorized', () => {
+            expect(isAuthorized).toHaveBeenCalledWith({ serverQueue, discordCommand });
         });
-        it('should call serverQueue.initServer with the id', () => {
-            expect(serverQueue.initServer).toHaveBeenCalledWith('serverId');
-        });
-        describe('when initServer returns true', () => {
+        describe('when isAuthorized returns true', () => {
             beforeEach(() => {
-                serverQueue.initServer.mockReturnValue(true);
+                isAuthorized.mockReturnValue(true);
                 executeCommand({
                     serverQueue, discordCommand,
                 });
             });
-            it('should send a message confirming initialization', () => {
-                expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.INITIALIZATION_SUCCESS);
+            it('should call discordCommand.getServerId to get the server ID', () => {
+                expect(discordCommand.getServerId).toHaveBeenCalled();
+            });
+            it('should call serverQueue.initServer with the id', () => {
+                expect(serverQueue.initServer).toHaveBeenCalledWith('serverId');
+            });
+            describe('when initServer returns true', () => {
+                beforeEach(() => {
+                    serverQueue.initServer.mockReturnValue(true);
+                    executeCommand({
+                        serverQueue, discordCommand,
+                    });
+                });
+                it('should send a message confirming initialization', () => {
+                    expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.INITIALIZATION_SUCCESS);
+                });
+            });
+            describe('when initServer returns false', () => {
+                beforeEach(() => {
+                    serverQueue.initServer.mockReturnValue(false);
+                    executeCommand({
+                        serverQueue, discordCommand,
+                    });
+                });
+                it('should send a message notifying that server is already initialized', () => {
+                    expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.INITIALIZATION_ALREADY_EXISTS);
+                });
             });
         });
-        describe('when initServer returns false', () => {
+        describe('when isAuthorized returns false', () => {
             beforeEach(() => {
-                serverQueue.initServer.mockReturnValue(false);
+                isAuthorized.mockReturnValue(false);
                 executeCommand({
                     serverQueue, discordCommand,
                 });
             });
-            it('should send a message notifying that server is already initialized', () => {
-                expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.INITIALIZATION_ALREADY_EXISTS);
+            it('should print a not authorized message', () => {
+                expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.NOT_AUTHORIZED);
+            });
+        });
+    });
+    describe('when command is addadmin', () => {
+        beforeEach(() => {
+            discordCommand.getCommand = jest.fn().mockReturnValue('addadmin');
+            executeCommand({
+                serverQueue, discordCommand,
+            });
+        });
+        it('should call isAuthorized', () => {
+            expect(isAuthorized).toHaveBeenCalledWith({ serverQueue, discordCommand });
+        });
+        describe('when isAuthorized returns true', () => {
+            beforeEach(() => {
+                isAuthorized.mockReturnValue(true);
+                discordCommand.getArgs.mockReturnValue('new role');
+                executeCommand({
+                    serverQueue, discordCommand,
+                });
+            });
+            it('calls serverQueue.addAdmin with the serverId and the arguments', () => {
+                expect(serverQueue.addAdmin).toHaveBeenCalledWith('serverId', 'new role');
+            });
+            describe('when addAdmin returns true', () => {
+                beforeEach(() => {
+                    serverQueue.addAdmin.mockReturnValue(true);
+                    executeCommand({
+                        serverQueue, discordCommand,
+                    });
+                });
+                it('prints a successfully added message', () => {
+                    expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.ADMIN_ADDED);
+                });
+            });
+            describe('when addAdmin returns false', () => {
+                beforeEach(() => {
+                    serverQueue.addAdmin.mockReturnValue(false);
+                    executeCommand({
+                        serverQueue, discordCommand,
+                    });
+                });
+                it('prints an already added message', () => {
+                    expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.ADMIN_ALREADY_ADDED);
+                });
+            });
+        });
+        describe('when isAuthorized returns false', () => {
+            beforeEach(() => {
+                isAuthorized.mockReturnValue(false);
+                executeCommand({
+                    serverQueue, discordCommand,
+                });
+            });
+            it('should print a not authorized message', () => {
+                expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.NOT_AUTHORIZED);
+            });
+        });
+    });
+    describe('when command is removeadmin', () => {
+        beforeEach(() => {
+            discordCommand.getCommand = jest.fn().mockReturnValue('removeadmin');
+            executeCommand({
+                serverQueue, discordCommand,
+            });
+        });
+        it('should call isAuthorized', () => {
+            expect(isAuthorized).toHaveBeenCalledWith({ serverQueue, discordCommand });
+        });
+        describe('when isAuthorized returns true', () => {
+            beforeEach(() => {
+                isAuthorized.mockReturnValue(true);
+                discordCommand.getArgs.mockReturnValue('new role');
+                executeCommand({
+                    serverQueue, discordCommand,
+                });
+            });
+            it('calls serverQueue.removeAdmin with the serverId and the arguments', () => {
+                expect(serverQueue.removeAdmin).toHaveBeenCalledWith('serverId', 'new role');
+            });
+            describe('when removeAdmin returns true', () => {
+                beforeEach(() => {
+                    serverQueue.removeAdmin.mockReturnValue(true);
+                    executeCommand({
+                        serverQueue, discordCommand,
+                    });
+                });
+                it('prints a successfully added message', () => {
+                    expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.ADMIN_REMOVED);
+                });
+            });
+            describe('when removeAdmin returns false', () => {
+                beforeEach(() => {
+                    serverQueue.removeAdmin.mockReturnValue(false);
+                    executeCommand({
+                        serverQueue, discordCommand,
+                    });
+                });
+                it('prints an already added message', () => {
+                    expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.ADMIN_NOT_FOUND);
+                });
+            });
+        });
+        describe('when isAuthorized returns false', () => {
+            beforeEach(() => {
+                isAuthorized.mockReturnValue(false);
+                executeCommand({
+                    serverQueue, discordCommand,
+                });
+            });
+            it('should print a not authorized message', () => {
+                expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.NOT_AUTHORIZED);
             });
         });
     });
