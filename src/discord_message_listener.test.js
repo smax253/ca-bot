@@ -28,6 +28,7 @@ describe('discord_message_listener', () => {
             },
         };
         const args = {
+            queue: 'queue',
             client: fakeClient,
             discordKey: 'discordKey',
         };
@@ -130,8 +131,11 @@ describe('discord_message_listener', () => {
                     );
                     messageCallback(message);
                 });
-                it('calls the execute command helper with the message', () => {
-                    expect(executeCommandMock).toHaveBeenCalledWith(command);
+                it('calls the execute command helper with the message and the queue', () => {
+                    expect(executeCommandMock).toHaveBeenCalledWith({
+                        discordCommand: command,
+                        serverQueue: 'queue',
+                    });
                 });
             });
         });
