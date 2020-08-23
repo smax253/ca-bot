@@ -10,32 +10,44 @@ const executeCommand = ({
     switch(command) {
     case 'init':
         runAuthorizedCommand({ serverQueue, discordCommand }, () => {
-            serverQueue.initServer(discordCommand.getServerId())
-                ? discordCommand.sendMessage(messages.INITIALIZATION_SUCCESS)
-                : discordCommand.sendMessage(messages.INITIALIZATION_ALREADY_EXISTS);
+            sendMessageWithBoolean({
+                result: serverQueue.initServer(discordCommand.getServerId()),
+                discordCommand,
+                trueMessage: messages.INITIALIZATION_SUCCESS,
+                falseMessage: messages.INITIALIZATION_ALREADY_EXISTS,
+            });
         });
         break;
     case 'addadmin':
         runAuthorizedCommand({ serverQueue, discordCommand }, () => {
-            serverQueue.addAdmin(discordCommand.getServerId(), discordCommand.getArgs())
-                ? discordCommand.sendMessage(messages.ADMIN_ADDED)
-                : discordCommand.sendMessage(messages.ADMIN_ALREADY_ADDED);
+            sendMessageWithBoolean({
+                result: serverQueue.addAdmin(discordCommand.getServerId(), discordCommand.getArgs()),
+                discordCommand,
+                trueMessage: messages.ADMIN_ADDED,
+                falseMessage: messages.ADMIN_ALREADY_ADDED,
+            });
         });
         break;
     case 'removeadmin':
         runAuthorizedCommand({ serverQueue, discordCommand }, () => {
-            serverQueue.removeAdmin(discordCommand.getServerId(), discordCommand.getArgs())
-                ? discordCommand.sendMessage(messages.ADMIN_REMOVED)
-                : discordCommand.sendMessage(messages.ADMIN_NOT_FOUND);
+            sendMessageWithBoolean({
+                result: serverQueue.removeAdmin(discordCommand.getServerId(), discordCommand.getArgs()),
+                discordCommand,
+                trueMessage: messages.ADMIN_REMOVED,
+                falseMessage: messages.ADMIN_NOT_FOUND,
+            });
         });
         break;
     case 'createroom':
         runAuthorizedCommand({ serverQueue, discordCommand }, () => {
             serverQueue.createRoom(discordCommand.getServerId(), discordCommand.getArgs(), discordCommand.getChannelManager(), client.user)
                 .then(result => {
-                    result
-                        ? discordCommand.sendMessage(messages.ROOM_CREATED)
-                        : discordCommand.sendMessage(messages.ROOM_NOT_CREATED);
+                    sendMessageWithBoolean({
+                        result,
+                        discordCommand,
+                        trueMessage: messages.ROOM_CREATED,
+                        falseMessage: messages.ROOM_NOT_CREATED,
+                    });
                 }).catch((error) => {
                     console.error('UNKNOWN ERROR: '.concat(error));
                     discordCommand.sendMessage('Unknown error occurred.');
@@ -43,20 +55,38 @@ const executeCommand = ({
         });
         break;
     case 'queue':
-        serverQueue.queue(discordCommand.getServerId(), discordCommand.getAuthor())
-            ? discordCommand.sendMessage(messages.QUEUE_SUCCESS)
-            : discordCommand.sendMessage(messages.QUEUE_ALREADY_QUEUED);
+        sendMessageWithBoolean({
+            result: serverQueue.queue(discordCommand.getServerId(), discordCommand.getAuthor()),
+            discordCommand,
+            trueMessage: messages.QUEUE_SUCCESS,
+            falseMessage: messages.QUEUE_ALREADY_QUEUED,
+        });
         break;
     case 'dequeue':
-        serverQueue.dequeue(discordCommand.getServerId())
-            ? discordCommand.sendMessage(messages.DEQUEUE_SUCCESS)
-            : discordCommand.sendMessage(messages.DEQUEUE_NOT_FOUND);
+        sendMessageWithBoolean({
+            result: serverQueue.dequeue(discordCommand.getServerId()),
+            discordCommand,
+            trueMessage: messages.DEQUEUE_SUCCESS,
+            falseMessage: messages.DEQUEUE_NOT_FOUND,
+        });
         break;
     case 'remove':
-        serverQueue.remove(discordCommand.getServerId(), discordCommand.getAuthor())
-            ? discordCommand.sendMessage(messages.REMOVE_SUCCESS)
-            : discordCommand.sendMessage(messages.REMOVE_NOT_FOUND);
+        sendMessageWithBoolean({
+            result: serverQueue.remove(discordCommand.getServerId(), discordCommand.getAuthor()),
+            discordCommand,
+            trueMessage: messages.REMOVE_SUCCESS,
+            falseMessage: messages.REMOVE_NOT_FOUND,
+        });
         break;
     }
 };
+
+const sendMessageWithBoolean = ({
+    result, discordCommand, trueMessage, falseMessage,
+}) => {
+    result
+        ? discordCommand.sendMessage(trueMessage)
+        : discordCommand.sendMessage(falseMessage);
+};
+
 module.exports = executeCommand;
