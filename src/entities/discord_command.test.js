@@ -12,6 +12,7 @@ describe('ENTITY: DiscordCommand', () => {
             server: {
                 id: 'guild',
                 ownerID: 'ownerID',
+                channels: 'channelManager',
             },
             serverId: 'guild',
             authorId: 'author',
@@ -22,11 +23,13 @@ describe('ENTITY: DiscordCommand', () => {
                 guild: {
                     id: 'guild',
                     ownerID: 'ownerID',
+                    channels: 'channelManager',
                 },
                 send: sendSpy,
             },
             roles: 'roles',
             ownerId: 'ownerID',
+            channelManager: 'channelManager',
         };
         actual = new DiscordCommand({
             message: {
@@ -38,6 +41,7 @@ describe('ENTITY: DiscordCommand', () => {
                     guild: {
                         id: 'guild',
                         ownerID: 'ownerID',
+                        channels: 'channelManager',
                     },
                     send: sendSpy,
                 },

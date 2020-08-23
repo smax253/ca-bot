@@ -4,8 +4,16 @@ jest.mock('./is_authorized');
 const isAuthorized = require('./is_authorized');
 
 describe('HELPER: executeCommand', () => {
-    let serverQueue, discordCommand;
+    let serverQueue, discordCommand, client;
     beforeEach(() => {
+        client = {
+            on: jest.fn(),
+            login: jest.fn(),
+            user: {
+                tag: 'username',
+                id: 'botId',
+            },
+        };
         serverQueue = {
             initServer: jest.fn(),
             queue: jest.fn(),
@@ -13,6 +21,7 @@ describe('HELPER: executeCommand', () => {
             remove: jest.fn(),
             addAdmin: jest.fn(),
             removeAdmin: jest.fn(),
+            createRoom: jest.fn(),
         };
         discordCommand = {
             getServer: jest.fn(),
@@ -20,6 +29,7 @@ describe('HELPER: executeCommand', () => {
             sendMessage: jest.fn(),
             getAuthor: jest.fn().mockReturnValue('student'),
             getArgs: jest.fn(),
+            getChannelManager: jest.fn().mockReturnValue('channelManager'),
         };
     });
     describe('when command is init', () => {
@@ -129,6 +139,64 @@ describe('HELPER: executeCommand', () => {
                 isAuthorized.mockReturnValue(false);
                 executeCommand({
                     serverQueue, discordCommand,
+                });
+            });
+            it('should print a not authorized message', () => {
+                expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.NOT_AUTHORIZED);
+            });
+        });
+    });
+    describe('when command is createroom', () => {
+        beforeEach(() => {
+            console.error = jest.fn();
+            serverQueue.createRoom.mockImplementation(() => Promise.reject(true));
+            discordCommand.getCommand = jest.fn().mockReturnValue('createroom');
+            executeCommand({
+                serverQueue, discordCommand, client,
+            });
+        });
+        it('should call isAuthorized', () => {
+            expect(isAuthorized).toHaveBeenCalledWith({ serverQueue, discordCommand });
+        });
+        describe('when isAuthorized returns true', () => {
+            beforeEach(() => {
+                isAuthorized.mockReturnValue(true);
+                discordCommand.getArgs.mockReturnValue('new room');
+                executeCommand({
+                    serverQueue, discordCommand, client,
+                });
+            });
+            it('calls serverQueue.createRoom with the serverId and the arguments', () => {
+                expect(serverQueue.createRoom).toHaveBeenCalledWith('serverId', 'new room', 'channelManager', client.user);
+            });
+            describe('when createRoom returns a promise that resolves to true', () => {
+                beforeEach(() => {
+                    serverQueue.createRoom.mockImplementation(() => Promise.resolve(true));
+                    executeCommand({
+                        serverQueue, discordCommand, client,
+                    });
+                });
+                it('prints a successfully added message', () => {
+                    expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.ROOM_CREATED);
+                });
+            });
+            describe('when createRoom returns false', () => {
+                beforeEach(() => {
+                    serverQueue.createRoom.mockImplementation(() => Promise.resolve(false));
+                    executeCommand({
+                        serverQueue, discordCommand, client,
+                    });
+                });
+                it('prints an already added message', () => {
+                    expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.ROOM_NOT_CREATED);
+                });
+            });
+        });
+        describe('when isAuthorized returns false', () => {
+            beforeEach(() => {
+                isAuthorized.mockReturnValue(false);
+                executeCommand({
+                    serverQueue, discordCommand, client,
                 });
             });
             it('should print a not authorized message', () => {
@@ -269,4 +337,5 @@ describe('HELPER: executeCommand', () => {
             });
         });
     });
+
 });

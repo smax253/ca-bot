@@ -4,6 +4,7 @@ const runAuthorizedCommand = require('./run_authorized_command');
 const executeCommand = ({
     serverQueue,
     discordCommand,
+    client,
 }) => {
     const command = discordCommand.getCommand();
     switch(command) {
@@ -26,6 +27,19 @@ const executeCommand = ({
             serverQueue.removeAdmin(discordCommand.getServerId(), discordCommand.getArgs())
                 ? discordCommand.sendMessage(messages.ADMIN_REMOVED)
                 : discordCommand.sendMessage(messages.ADMIN_NOT_FOUND);
+        });
+        break;
+    case 'createroom':
+        runAuthorizedCommand({ serverQueue, discordCommand }, () => {
+            serverQueue.createRoom(discordCommand.getServerId(), discordCommand.getArgs(), discordCommand.getChannelManager(), client.user)
+                .then(result => {
+                    result
+                        ? discordCommand.sendMessage(messages.ROOM_CREATED)
+                        : discordCommand.sendMessage(messages.ROOM_NOT_CREATED);
+                }).catch((error) => {
+                    console.error('UNKNOWN ERROR: '.concat(error));
+                    discordCommand.sendMessage('Unknown error occurred.');
+                });
         });
         break;
     case 'queue':

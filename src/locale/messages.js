@@ -13,5 +13,7 @@ const messages = {
     ADMIN_ALREADY_ADDED: 'Role is already an admin!',
     ADMIN_REMOVED: 'Role has been successfully removed from admin roles.',
     ADMIN_NOT_FOUND: 'Role is not an admin role.',
+    ROOM_CREATED: 'Room successfully created.',
+    ROOM_NOT_CREATED: 'Room could not be created.',
 };
 module.exports = messages;

@@ -9,6 +9,7 @@ describe('ENTITY: ServerQueue', () => {
         getDocDataWithIdMock.mockImplementation(() => {});
         setSpy = jest.fn();
         jest.spyOn(ServerQueue.prototype, 'getData');
+        jest.spyOn(ServerQueue.prototype, 'syncData');
         collectionRef = {
             doc: jest.fn().mockReturnValue({
                 set: setSpy,
@@ -92,17 +93,40 @@ describe('ENTITY: ServerQueue', () => {
             });
         });
     });
+
     describe('methods called with commands', () => {
         beforeEach(() => {
             instance.servers = {
                 serverId1: {
                     queue: ['queue1', 'queue2'],
                     admin_roles: ['admin1', 'admin2'],
-                    groups: {
-                        private: 'private',
-                    },
+                    groups: [
+                        {
+                            private: 'private',
+                        },
+                    ],
                 },
             };
+        });
+        describe('syncData()', () => {
+            beforeEach(() => {
+                collectionRef.doc.mockClear();
+                setSpy.mockClear();
+                instance.servers.serverId1.admin_roles = ['newadminrole'];
+                instance.servers.serverId1.groups = {
+                    private: 'newPrivate',
+                };
+                instance.syncData('serverId1');
+            });
+            it('calls collectionRef.doc with the serverId', () => {
+                expect(collectionRef.doc).toHaveBeenCalledWith('serverId1');
+            });
+            it('sets admin roles and groups in the document', () => {
+                expect(setSpy).toHaveBeenCalledWith({
+                    admin_roles: instance.servers.serverId1.admin_roles,
+                    groups: instance.servers.serverId1.groups,
+                });
+            });
         });
         describe('initServer()', () => {
             describe('when the server already exists', () => {
@@ -158,10 +182,14 @@ describe('ENTITY: ServerQueue', () => {
             let result;
             describe('when role is not an admin', () => {
                 beforeEach(() => {
+                    instance.syncData.mockClear();
                     result = instance.addAdmin('serverId1', 'admin3');
                 });
                 it('adds the role to the list of admins', () => {
                     expect(instance.servers.serverId1.admin_roles.includes('admin3')).toEqual(true);
+                });
+                it('calls syncData with the serverId', () => {
+                    expect(instance.syncData).toHaveBeenCalledWith('serverId1');
                 });
                 it('returns true', () => {
                     expect(result).toEqual(true);
@@ -183,10 +211,14 @@ describe('ENTITY: ServerQueue', () => {
             let result;
             describe('when role is an admin', () => {
                 beforeEach(() => {
+                    instance.syncData.mockClear();
                     result = instance.removeAdmin('serverId1', 'admin1');
                 });
                 it('removes the role from the list of admins', () => {
                     expect(instance.servers.serverId1.admin_roles.includes('admin1')).toEqual(false);
+                });
+                it('calls syncData with the serverId', () => {
+                    expect(instance.syncData).toHaveBeenCalledWith('serverId1');
                 });
                 it('returns true', () => {
                     expect(result).toEqual(true);
@@ -201,6 +233,132 @@ describe('ENTITY: ServerQueue', () => {
                 });
                 it('returns false', () => {
                     expect(result).toEqual(false);
+                });
+            });
+        });
+        describe('createRoom()', () => {
+            let result, channelManager;
+            beforeEach(() => {
+                instance.syncData.mockClear();
+                channelManager = {
+                    create: jest.fn(),
+                    guild: {
+                        roles: {
+                            everyone: 'everyone',
+                        },
+                    },
+                };
+            });
+            describe('when the room does not exist', () => {
+                let category, publicVoice, publicText, botText, privateVoice, channels;
+                beforeEach(() => {
+                    channelManager.create.mockImplementation(() => Promise.reject('not defined'));
+                    category = {
+                        id: 'categoryid',
+                    };
+                    publicText = {
+                        id: 'publicText',
+                    },
+                    publicVoice = {
+                        id: 'publicVoice',
+                    };
+                    botText = {
+                        id: 'botText',
+                    };
+                    privateVoice = {
+                        id: 'privateVoice',
+                    };
+                    channels = [category, publicText, botText, privateVoice, publicVoice];
+                });
+                describe('when channels get created successfully', () => {
+                    beforeEach(() => {
+                        channels.forEach((channel) => channelManager.create.mockImplementationOnce(() => {
+                            return Promise.resolve(channel);
+                        }));
+                        const selfRole = 'self';
+                        result = instance.createRoom('serverId1', 'New CA Room', channelManager, selfRole);
+                    });
+                    it('should create a new category using the channel manager', () => {
+                        expect(channelManager.create).toHaveBeenCalledWith('New CA Room', {
+                            type: 'category',
+                            permissionOverwrites: [
+                                {
+                                    id: 'everyone',
+                                    deny: ['VIEW_CHANNEL'],
+                                },
+                                {
+                                    id: 'self',
+                                    allow: ['VIEW_CHANNEL'],
+                                },
+                            ],
+                        });
+                    });
+                    it('should create a public text channel', () => {
+                        expect(channelManager.create).toHaveBeenCalledWith('no-mic', {
+                            topic: 'General text chat for New CA Room',
+                            parent: category,
+                            permissionOverwrites: [
+                                {
+                                    id: 'self',
+                                    deny: ['VIEW_CHANNEL'],
+                                },
+                            ],
+                        });
+
+                    });
+                    it('should create a channel for bot commands', () => {
+                        expect(channelManager.create).toHaveBeenCalledWith('bot-commands', {
+                            topic: 'Bot commands for New CA Room',
+                            parent: category,
+                        });
+                    });
+                    it('should create a voice channel with max 2 members', () => {
+                        expect(channelManager.create).toHaveBeenCalledWith('1-on-1', {
+                            type: 'voice',
+                            parent: category,
+                            userLimit: 2,
+                        });
+                    });
+                    it('should create a voice channel with no limit on members', () => {
+                        expect(channelManager.create).toHaveBeenCalledWith('Office', {
+                            type: 'voice',
+                            parent: category,
+                        });
+                    });
+                    it('should update the instance.servers with the new server IDs', () => {
+                        expect(instance.servers.serverId1.groups).toContainEqual({
+                            bot_text_channel_id: 'botText',
+                            id: 'categoryid',
+                            private_channel_id: 'privateVoice',
+                            public_channel_id: 'publicVoice',
+                            text_channel_id: 'publicText',
+                        });
+                    });
+                    it('should call syncData with the serverId', () => {
+                        expect(instance.syncData).toHaveBeenCalledWith('serverId1');
+                    });
+                    it('should return promise that resolves to true', () => {
+                        expect.assertions(1);
+                        return expect(result).resolves.toEqual(true);
+                    });
+                });
+                describe('when channels fail to get created', () => {
+                    beforeEach(() => {
+                        console.error = jest.fn();
+                        channelManager.create.mockImplementation(() => {
+                            return new Promise((_, reject) => {
+                                reject('error');
+                            });
+                        });
+                        result = instance.createRoom('serverId1', 'New CA Room', channelManager);
+                    });
+                    it('should print the error to console.error', () => {
+                        expect(console.error).toHaveBeenCalledWith('Error in createRoom(): ' + 'error');
+                    });
+                    it('should return a promise that resolves to false', () => {
+                        expect.assertions(1);
+                        return expect(result).resolves.toEqual(false);
+                    });
                 });
             });
         });

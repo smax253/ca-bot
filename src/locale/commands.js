@@ -9,6 +9,7 @@ module.exports = {
         removeadmin: 'removeadmin',
         remove: 'remove',
         r: 'remove',
+        createroom: 'createroom',
     },
     prefix: '!',
 };

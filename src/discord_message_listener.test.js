@@ -135,6 +135,7 @@ describe('discord_message_listener', () => {
                     expect(executeCommandMock).toHaveBeenCalledWith({
                         discordCommand: command,
                         serverQueue: 'queue',
+                        client: fakeClient,
                     });
                 });
             });

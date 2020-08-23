@@ -11,7 +11,7 @@ const discordMessageListener = ({ queue, client, discordKey }) => {
         const parsedCommand = parseCommand(message);
         if (parsedCommand) {
             parsedCommand.getIsCommand()
-                ? executeCommand({ discordCommand: parsedCommand, serverQueue: queue })
+                ? executeCommand({ discordCommand: parsedCommand, serverQueue: queue, client })
                 : message.channel.send(messages.UNKNOWN_COMMAND);
         }
     });
