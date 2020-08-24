@@ -26,10 +26,14 @@ describe('ENTITY: DiscordCommand', () => {
                     channels: 'channelManager',
                 },
                 send: sendSpy,
+                parentID: 'parentID',
+                parent: 'parent',
             },
             roles: 'roles',
             ownerId: 'ownerID',
             channelManager: 'channelManager',
+            parent: 'parent',
+            parentId: 'parentID',
         };
         actual = new DiscordCommand({
             message: {
@@ -44,6 +48,8 @@ describe('ENTITY: DiscordCommand', () => {
                         channels: 'channelManager',
                     },
                     send: sendSpy,
+                    parentID: 'parentID',
+                    parent: 'parent',
                 },
                 member: {
                     roles: 'roles',

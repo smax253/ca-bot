@@ -17,6 +17,8 @@ const DiscordCommand = function({
     this.getRoles = () => message.member.roles;
     this.getOwnerId = () => message.channel.guild.ownerID;
     this.getChannelManager = () => message.channel.guild.channels;
+    this.getParentId = () => message.channel.parentID;
+    this.getParent = () => message.channel.parent;
     this.toObject = () => {
         return {
             content: this.getContent(),
@@ -31,6 +33,8 @@ const DiscordCommand = function({
             roles: this.getRoles(),
             ownerId: this.getOwnerId(),
             channelManager: this.getChannelManager(),
+            parentId: this.getParentId(),
+            parent: this.getParent(),
         };
     };
 };

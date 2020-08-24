@@ -101,6 +101,17 @@ class ServerQueue {
             return true;
         }
     }
+    isGroup(serverId, groupId) {
+        const groups = this.servers[serverId].groups;
+        return groups.map(group => group.id).includes(groupId);
+    }
+    initQueue(serverId, groupId) {
+        const groups = this.servers[serverId].groups;
+        const targetGroup = groups.find(group => group.id === groupId);
+        if (targetGroup.queue) return false;
+        targetGroup.queue = [];
+        return true;
+    }
     createRoom(serverId, roomName, channelManager, selfRole) {
         return createCategoryChannel({
             roomName, selfRole, channelManager,
