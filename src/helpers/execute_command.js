@@ -67,7 +67,7 @@ const executeCommand = ({
             result: serverQueue.dequeue(discordCommand.getServerId()),
             discordCommand,
             trueMessage: messages.DEQUEUE_SUCCESS,
-            falseMessage: messages.DEQUEUE_NOT_FOUND,
+            falseMessage: messages.DEQUEUE_EMPTY,
         });
         break;
     case 'remove':

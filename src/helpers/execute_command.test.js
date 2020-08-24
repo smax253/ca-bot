@@ -57,6 +57,7 @@ describe('HELPER: executeCommand', () => {
             });
             describe('when initServer returns true', () => {
                 beforeEach(() => {
+                    discordCommand.sendMessage.mockClear();
                     serverQueue.initServer.mockReturnValue(true);
                     executeCommand({
                         serverQueue, discordCommand,
@@ -68,6 +69,7 @@ describe('HELPER: executeCommand', () => {
             });
             describe('when initServer returns false', () => {
                 beforeEach(() => {
+                    discordCommand.sendMessage.mockClear();
                     serverQueue.initServer.mockReturnValue(false);
                     executeCommand({
                         serverQueue, discordCommand,
@@ -80,6 +82,7 @@ describe('HELPER: executeCommand', () => {
         });
         describe('when isAuthorized returns false', () => {
             beforeEach(() => {
+                discordCommand.sendMessage.mockClear();
                 isAuthorized.mockReturnValue(false);
                 executeCommand({
                     serverQueue, discordCommand,
@@ -113,6 +116,7 @@ describe('HELPER: executeCommand', () => {
             });
             describe('when addAdmin returns true', () => {
                 beforeEach(() => {
+                    discordCommand.sendMessage.mockClear();
                     serverQueue.addAdmin.mockReturnValue(true);
                     executeCommand({
                         serverQueue, discordCommand,
@@ -124,6 +128,7 @@ describe('HELPER: executeCommand', () => {
             });
             describe('when addAdmin returns false', () => {
                 beforeEach(() => {
+                    discordCommand.sendMessage.mockClear();
                     serverQueue.addAdmin.mockReturnValue(false);
                     executeCommand({
                         serverQueue, discordCommand,
@@ -136,6 +141,7 @@ describe('HELPER: executeCommand', () => {
         });
         describe('when isAuthorized returns false', () => {
             beforeEach(() => {
+                discordCommand.sendMessage.mockClear();
                 isAuthorized.mockReturnValue(false);
                 executeCommand({
                     serverQueue, discordCommand,
@@ -171,6 +177,7 @@ describe('HELPER: executeCommand', () => {
             });
             describe('when createRoom returns a promise that resolves to true', () => {
                 beforeEach(() => {
+                    discordCommand.sendMessage.mockClear();
                     serverQueue.createRoom.mockImplementation(() => Promise.resolve(true));
                     executeCommand({
                         serverQueue, discordCommand, client,
@@ -182,6 +189,7 @@ describe('HELPER: executeCommand', () => {
             });
             describe('when createRoom returns false', () => {
                 beforeEach(() => {
+                    discordCommand.sendMessage.mockClear();
                     serverQueue.createRoom.mockImplementation(() => Promise.resolve(false));
                     executeCommand({
                         serverQueue, discordCommand, client,
@@ -194,6 +202,7 @@ describe('HELPER: executeCommand', () => {
         });
         describe('when isAuthorized returns false', () => {
             beforeEach(() => {
+                discordCommand.sendMessage.mockClear();
                 isAuthorized.mockReturnValue(false);
                 executeCommand({
                     serverQueue, discordCommand, client,
@@ -227,6 +236,7 @@ describe('HELPER: executeCommand', () => {
             });
             describe('when removeAdmin returns true', () => {
                 beforeEach(() => {
+                    discordCommand.sendMessage.mockClear();
                     serverQueue.removeAdmin.mockReturnValue(true);
                     executeCommand({
                         serverQueue, discordCommand,
@@ -238,6 +248,7 @@ describe('HELPER: executeCommand', () => {
             });
             describe('when removeAdmin returns false', () => {
                 beforeEach(() => {
+                    discordCommand.sendMessage.mockClear();
                     serverQueue.removeAdmin.mockReturnValue(false);
                     executeCommand({
                         serverQueue, discordCommand,
@@ -250,6 +261,7 @@ describe('HELPER: executeCommand', () => {
         });
         describe('when isAuthorized returns false', () => {
             beforeEach(() => {
+                discordCommand.sendMessage.mockClear();
                 isAuthorized.mockReturnValue(false);
                 executeCommand({
                     serverQueue, discordCommand,
@@ -276,6 +288,7 @@ describe('HELPER: executeCommand', () => {
             const zipped = cases.map((val, ind) => [val, strings[ind]]);
             describe.each(zipped)('when method returns %p', (value, msg) => {
                 beforeEach(() => {
+                    discordCommand.sendMessage.mockClear();
                     serverQueue.queue.mockReturnValue(value);
                     executeCommand({
                         serverQueue, discordCommand,
@@ -297,10 +310,11 @@ describe('HELPER: executeCommand', () => {
                 expect(serverQueue.dequeue).toHaveBeenCalledWith('serverId');
             });
             const cases = ['user', null];
-            const strings = [messages.DEQUEUE_SUCCESS, messages.DEQUEUE_NOT_FOUND];
+            const strings = [messages.DEQUEUE_SUCCESS, messages.DEQUEUE_EMPTY];
             const zipped = cases.map((val, ind) => [val, strings[ind]]);
             describe.each(zipped)('when method returns %p', (value, msg) => {
                 beforeEach(() => {
+                    discordCommand.sendMessage.mockClear();
                     serverQueue.dequeue.mockReturnValue(value);
                     executeCommand({
                         serverQueue, discordCommand,
@@ -326,6 +340,7 @@ describe('HELPER: executeCommand', () => {
             const zipped = cases.map((val, ind) => [val, strings[ind]]);
             describe.each(zipped)('when method returns %p', (value, msg) => {
                 beforeEach(() => {
+                    discordCommand.sendMessage.mockClear();
                     serverQueue.remove.mockReturnValue(value);
                     executeCommand({
                         serverQueue, discordCommand,
