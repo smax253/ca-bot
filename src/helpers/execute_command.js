@@ -1,6 +1,7 @@
 const messages = require('../locale/messages');
 const runAuthorizedCommand = require('./run_authorized_command');
 const checkArgs = require('./check_args');
+const showServer = require('./show_server');
 
 const executeCommand = ({
     serverQueue,
@@ -55,6 +56,23 @@ const executeCommand = ({
                         discordCommand.sendMessage('Unknown error occurred.');
                     })
                 : discordCommand.sendMessage(messages.MISSING_ARGS);
+        });
+        break;
+    case 'start':
+        runAuthorizedCommand({ serverQueue, discordCommand }, () => {
+            if (serverQueue.isGroup(discordCommand.getServerId(), discordCommand.getParentId())) {
+                if (serverQueue.initQueue(discordCommand.getServerId(), discordCommand.getParentId())) {
+                    showServer({ parentCategoryServer: discordCommand.getParent() });
+                    discordCommand.sendMessage(messages.OFFICE_HOURS_STARTED);
+                }
+                else {
+                    discordCommand.sendMessage(messages.OFFICE_HOURS_ALREADY_STARTED);
+                }
+            }
+            else{
+                discordCommand.sendMessage(messages.OFFICE_HOURS_WRONG_CHANNEL);
+            }
+
         });
         break;
     case 'queue':

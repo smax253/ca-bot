@@ -16,5 +16,8 @@ const messages = {
     ROOM_CREATED: 'Room successfully created.',
     ROOM_NOT_CREATED: 'Room could not be created.',
     MISSING_ARGS: 'Missing arguments.',
+    OFFICE_HOURS_STARTED: 'Office hours have started!',
+    OFFICE_HOURS_ALREADY_STARTED: 'Office hours have already started!',
+    OFFICE_HOURS_WRONG_CHANNEL: 'Please run this command in an office hours group.',
 };
 module.exports = messages;

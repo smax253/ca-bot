@@ -6,6 +6,9 @@ jest.mock('./check_args');
 const checkArgs = require('./check_args');
 
 
+jest.mock('../helpers/show_server');
+const showServer = require('../helpers/show_server');
+
 describe('HELPER: executeCommand', () => {
     let serverQueue, discordCommand, client;
     beforeEach(() => {
@@ -25,6 +28,8 @@ describe('HELPER: executeCommand', () => {
             addAdmin: jest.fn(),
             removeAdmin: jest.fn(),
             createRoom: jest.fn(),
+            isGroup: jest.fn(),
+            initQueue: jest.fn(),
         };
         discordCommand = {
             getServer: jest.fn(),
@@ -33,6 +38,8 @@ describe('HELPER: executeCommand', () => {
             getAuthor: jest.fn().mockReturnValue('student'),
             getArgs: jest.fn(),
             getChannelManager: jest.fn().mockReturnValue('channelManager'),
+            getParentId: jest.fn().mockReturnValue('parentId'),
+            getParent: jest.fn().mockReturnValue('parent'),
         };
     });
     describe('when command is init', () => {
@@ -285,6 +292,92 @@ describe('HELPER: executeCommand', () => {
                 });
                 it('prints an already added message', () => {
                     expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.ADMIN_NOT_FOUND);
+                });
+            });
+        });
+        describe('when isAuthorized returns false', () => {
+            beforeEach(() => {
+                discordCommand.sendMessage.mockClear();
+                isAuthorized.mockReturnValue(false);
+                executeCommand({
+                    serverQueue, discordCommand,
+                });
+            });
+            it('should print a not authorized message', () => {
+                expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.NOT_AUTHORIZED);
+            });
+        });
+    });
+    describe('when command is start', () => {
+        beforeEach(() => {
+            discordCommand.getCommand = jest.fn().mockReturnValue('start');
+            executeCommand({
+                serverQueue, discordCommand,
+            });
+        });
+        it('should call isAuthorized', () => {
+            expect(isAuthorized).toHaveBeenCalledWith({ serverQueue, discordCommand });
+        });
+        describe('when isAuthorized returns true', () => {
+            beforeEach(() => {
+                isAuthorized.mockReturnValue(true);
+                executeCommand({
+                    serverQueue, discordCommand,
+                });
+            });
+            it('calls serverQueue.isGroup with the serverId and the parentId', () => {
+                expect(serverQueue.isGroup).toHaveBeenCalledWith('serverId', 'parentId');
+            });
+            describe('if text channel is in a group', () => {
+                beforeEach(() => {
+                    serverQueue.isGroup.mockReturnValue(true);
+                    executeCommand({
+                        serverQueue, discordCommand,
+                    });
+                });
+                it('should call serverQueue.initQueue with the serverId and the groupId', () => {
+                    expect(serverQueue.initQueue).toHaveBeenCalledWith('serverId', 'parentId');
+                });
+                describe('when initQueue returns true', () => {
+                    beforeEach(() => {
+                        discordCommand.sendMessage.mockClear();
+                        serverQueue.initQueue.mockReturnValue(true);
+                        executeCommand({
+                            serverQueue, discordCommand,
+                        });
+                    });
+                    it('calls showServer helper with the parent channel', () => {
+                        expect(showServer).toHaveBeenCalledWith({
+                            parentCategoryServer: 'parent',
+                        });
+                    });
+                    it('prints a message that office hours have started', () => {
+                        expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.OFFICE_HOURS_STARTED);
+                    });
+                });
+                describe('when initQueue returns false', () => {
+                    beforeEach(() => {
+                        discordCommand.sendMessage.mockClear();
+                        serverQueue.initQueue.mockReturnValue(false);
+                        executeCommand({
+                            serverQueue, discordCommand,
+                        });
+                    });
+                    it('should send an already started message', () => {
+                        expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.OFFICE_HOURS_ALREADY_STARTED);
+                    });
+                });
+            });
+            describe('if text channel is not in a group', () => {
+                beforeEach(() => {
+                    discordCommand.sendMessage.mockClear();
+                    serverQueue.isGroup.mockReturnValue(false);
+                    executeCommand({
+                        serverQueue, discordCommand,
+                    });
+                });
+                it('should send a wrong channel message', () => {
+                    expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.OFFICE_HOURS_WRONG_CHANNEL);
                 });
             });
         });

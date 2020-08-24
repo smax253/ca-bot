@@ -102,7 +102,10 @@ describe('ENTITY: ServerQueue', () => {
                     admin_roles: ['admin1', 'admin2'],
                     groups: [
                         {
-                            private: 'private',
+                            id: 'group1',
+                        },
+                        {
+                            id: 'group2',
                         },
                     ],
                 },
@@ -359,6 +362,48 @@ describe('ENTITY: ServerQueue', () => {
                         expect.assertions(1);
                         return expect(result).resolves.toEqual(false);
                     });
+                });
+            });
+        });
+        describe('isGroup()', () => {
+            let result;
+            describe('when parent is in a group', () => {
+                beforeEach(() => {
+                    result = instance.isGroup('serverId1', 'group1');
+                });
+                it('returns true', () => {
+                    expect(result).toEqual(true);
+                });
+            });
+            describe('when parent is not in a group', () => {
+                beforeEach(() => {
+                    result = instance.isGroup('serverId1', 'group3');
+                });
+                it('returns true', () => {
+                    expect(result).toEqual(false);
+                });
+            });
+        });
+        describe('initQueue()', () => {
+            let result;
+            describe('when queue is not initialized', () => {
+                beforeEach(() => {
+                    result = instance.initQueue('serverId1', 'group1');
+                });
+                it('should create a new queue in the group', () => {
+                    expect(instance.servers.serverId1.groups[0].queue).toEqual([]);
+                });
+                it('should return true', () => {
+                    expect(result).toEqual(true);
+                });
+            });
+            describe('when queue is already initalized', () => {
+                beforeEach(() => {
+                    instance.servers.serverId1.groups[1].queue = [];
+                    result = instance.initQueue('serverId1', 'group2');
+                });
+                it('should return false', () => {
+                    expect(result).toEqual(false);
                 });
             });
         });
