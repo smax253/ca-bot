@@ -1,6 +1,9 @@
 const blank_server = require('../constants/blank_server');
 const getDocDataWithId = require('../helpers/get_document_data_with_id');
 const matchStudentIds = require('../helpers/match_student_ids');
+const extractIds = require('../helpers/extract_ids');
+const createChildChannels = require('../helpers/create_child_channels');
+const createCategoryChannel = require('../helpers/create_category_channel');
 
 class ServerQueue {
     constructor(collectionRef) {
@@ -99,52 +102,19 @@ class ServerQueue {
         }
     }
     createRoom(serverId, roomName, channelManager, selfRole) {
-        return channelManager.create(roomName, {
-            type: 'category',
-            permissionOverwrites: [
-                {
-                    id: channelManager.guild.roles.everyone,
-                    deny: ['VIEW_CHANNEL'],
-                },
-                {
-                    id: selfRole,
-                    allow: ['VIEW_CHANNEL'],
-                },
-            ],
+        return createCategoryChannel({
+            roomName, selfRole, channelManager,
+            everyoneRole: channelManager.guild.roles.everyone,
         }).then(categoryChannel => {
             const channels = [categoryChannel];
-            channels.push(channelManager.create('no-mic', {
-                topic: 'General text chat for '.concat(roomName),
-                parent: categoryChannel,
-                permissionOverwrites: [
-                    {
-                        id: selfRole,
-                        deny: ['VIEW_CHANNEL'],
-                    },
-                ],
-            }));
-            channels.push(channelManager.create('bot-commands', {
-                topic: 'Bot commands for '.concat(roomName),
-                parent: categoryChannel,
-            }));
-            channels.push(channelManager.create('1-on-1', {
-                type: 'voice',
-                parent: categoryChannel,
-                userLimit: 2,
-            }));
-            channels.push(channelManager.create('Office', {
-                type: 'voice',
+            channels.push(...createChildChannels({
+                channelManager, roomName, selfRole,
                 parent: categoryChannel,
             }));
             return Promise.all(channels);
         }).then(childChannels => {
-            const labels = ['id', 'text_channel_id', 'bot_text_channel_id', 'private_channel_id', 'public_channel_id'];
             const groups = this.servers[serverId].groups;
-            const newGroup = {};
-            labels.forEach((elem, ind) => {
-                newGroup[elem] = childChannels[ind].id;
-            });
-            groups.push(newGroup);
+            groups.push(extractIds(childChannels));
             this.syncData(serverId);
             return true;
         }).catch(error => {
