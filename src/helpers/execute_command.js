@@ -1,5 +1,6 @@
 const messages = require('../locale/messages');
 const runAuthorizedCommand = require('./run_authorized_command');
+const checkArgs = require('./check_args');
 
 const executeCommand = ({
     serverQueue,
@@ -40,18 +41,20 @@ const executeCommand = ({
         break;
     case 'createroom':
         runAuthorizedCommand({ serverQueue, discordCommand }, () => {
-            serverQueue.createRoom(discordCommand.getServerId(), discordCommand.getArgs(), discordCommand.getChannelManager(), client.user)
-                .then(result => {
-                    sendMessageWithBoolean({
-                        result,
-                        discordCommand,
-                        trueMessage: messages.ROOM_CREATED,
-                        falseMessage: messages.ROOM_NOT_CREATED,
-                    });
-                }).catch((error) => {
-                    console.error('UNKNOWN ERROR: '.concat(error));
-                    discordCommand.sendMessage('Unknown error occurred.');
-                });
+            checkArgs(discordCommand)
+                ? serverQueue.createRoom(discordCommand.getServerId(), discordCommand.getArgs(), discordCommand.getChannelManager(), client.user)
+                    .then(result => {
+                        sendMessageWithBoolean({
+                            result,
+                            discordCommand,
+                            trueMessage: messages.ROOM_CREATED,
+                            falseMessage: messages.ROOM_NOT_CREATED,
+                        });
+                    }).catch((error) => {
+                        console.error('UNKNOWN ERROR: '.concat(error));
+                        discordCommand.sendMessage('Unknown error occurred.');
+                    })
+                : discordCommand.sendMessage(messages.MISSING_ARGS);
         });
         break;
     case 'queue':

@@ -2,6 +2,9 @@ const executeCommand = require('./execute_command');
 const messages = require('../locale/messages');
 jest.mock('./is_authorized');
 const isAuthorized = require('./is_authorized');
+jest.mock('./check_args');
+const checkArgs = require('./check_args');
+
 
 describe('HELPER: executeCommand', () => {
     let serverQueue, discordCommand, client;
@@ -172,32 +175,58 @@ describe('HELPER: executeCommand', () => {
                     serverQueue, discordCommand, client,
                 });
             });
-            it('calls serverQueue.createRoom with the serverId and the arguments', () => {
-                expect(serverQueue.createRoom).toHaveBeenCalledWith('serverId', 'new room', 'channelManager', client.user);
+            it('calls the helper ', () => {
+                expect(checkArgs).toHaveBeenCalledWith(discordCommand);
             });
-            describe('when createRoom returns a promise that resolves to true', () => {
+            describe('when checkArgs returns true', () => {
                 beforeEach(() => {
-                    discordCommand.sendMessage.mockClear();
-                    serverQueue.createRoom.mockImplementation(() => Promise.resolve(true));
+
+                    checkArgs.mockReturnValue(true);
                     executeCommand({
                         serverQueue, discordCommand, client,
                     });
                 });
-                it('prints a successfully added message', () => {
-                    expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.ROOM_CREATED);
+                it('calls serverQueue.createRoom with the serverId and the arguments', () => {
+                    expect(serverQueue.createRoom).toHaveBeenCalledWith('serverId', 'new room', 'channelManager', client.user);
+                });
+                describe('when createRoom returns a promise that resolves to true', () => {
+                    beforeEach(() => {
+                        discordCommand.sendMessage.mockClear();
+                        serverQueue.createRoom.mockImplementation(() => Promise.resolve(true));
+                        executeCommand({
+                            serverQueue, discordCommand, client,
+                        });
+                    });
+                    it('prints a successfully added message', () => {
+                        expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.ROOM_CREATED);
+                    });
+                });
+                describe('when createRoom returns false', () => {
+
+                    beforeEach(() => {
+                        discordCommand.sendMessage.mockClear();
+                        serverQueue.createRoom.mockImplementation(() => Promise.resolve(false));
+                        executeCommand({
+                            serverQueue, discordCommand, client,
+                        });
+                    });
+                    it('prints an already added message', () => {
+                        expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.ROOM_NOT_CREATED);
+                    });
                 });
             });
-            describe('when createRoom returns false', () => {
+            describe('when checkArgs returns false', () => {
                 beforeEach(() => {
                     discordCommand.sendMessage.mockClear();
-                    serverQueue.createRoom.mockImplementation(() => Promise.resolve(false));
+                    checkArgs.mockReturnValue(false);
                     executeCommand({
                         serverQueue, discordCommand, client,
                     });
                 });
-                it('prints an already added message', () => {
-                    expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.ROOM_NOT_CREATED);
+                it('prints a missing args message', () => {
+                    expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.MISSING_ARGS);
                 });
+
             });
         });
         describe('when isAuthorized returns false', () => {
