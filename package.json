@@ -14,7 +14,7 @@
   "scripts": {
     "test": "jest",
     "start": "node -r dotenv/config src/index.js",
-    "lint": "eslint **/*.js --fix",
+    "lint": "eslint src/**/*.js --fix",
     "test:coverage": "jest --coverage",
     "cleantest": "eslint **/*.js --fix && jest",
     "test:watch": "jest --watchAll --maxWorkers=30%",

@@ -15,5 +15,6 @@ const messages = {
     ADMIN_NOT_FOUND: 'Role is not an admin role.',
     ROOM_CREATED: 'Room successfully created.',
     ROOM_NOT_CREATED: 'Room could not be created.',
+    MISSING_ARGS: 'Missing arguments.',
 };
 module.exports = messages;
