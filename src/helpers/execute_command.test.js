@@ -11,6 +11,9 @@ const showServer = require('../helpers/show_server');
 jest.mock('./run_group_command');
 const runGroupCommand = require('./run_group_command');
 
+jest.mock('./run_command_if_active');
+const runCommandIfActive = require('./run_command_if_active');
+
 describe('HELPER: executeCommand', () => {
     let serverQueue, discordCommand, client;
     beforeEach(() => {
@@ -390,6 +393,7 @@ describe('HELPER: executeCommand', () => {
     describe('queue manipulation commands', () => {
         beforeEach(() => {
             runGroupCommand.mockClear();
+            runCommandIfActive.mockClear();
         });
         describe('when command is queue', () => {
             let callback;
@@ -408,20 +412,29 @@ describe('HELPER: executeCommand', () => {
                     callback = runGroupCommand.mock.calls[0][1];
                     callback();
                 });
-                it('should call serverQueue.queue with the serverId, groupId, and student', () => {
-                    expect(serverQueue.queue).toHaveBeenCalledWith('serverId', 'parentId', 'student');
+                it('should call runCommandIfActive with correct arguments', () => {
+                    expect(runCommandIfActive).toHaveBeenCalledWith({ serverQueue, discordCommand }, expect.any(Function));
                 });
-                const cases = [true, false];
-                const strings = [messages.QUEUE_SUCCESS, messages.QUEUE_ALREADY_QUEUED];
-                const zipped = cases.map((val, ind) => [val, strings[ind]]);
-                describe.each(zipped)('when method returns %p', (value, msg) => {
+                describe('runCommandIfActive callback', () => {
                     beforeEach(() => {
-                        discordCommand.sendMessage.mockClear();
-                        serverQueue.queue.mockReturnValue(value);
+                        callback = runCommandIfActive.mock.calls[0][1];
                         callback();
                     });
-                    it('should send a the correct message', () => {
-                        expect(discordCommand.sendMessage).toHaveBeenCalledWith(msg);
+                    it('should call serverQueue.queue with the serverId, groupId, and student', () => {
+                        expect(serverQueue.queue).toHaveBeenCalledWith('serverId', 'parentId', 'student');
+                    });
+                    const cases = [true, false];
+                    const strings = [messages.QUEUE_SUCCESS, messages.QUEUE_ALREADY_QUEUED];
+                    const zipped = cases.map((val, ind) => [val, strings[ind]]);
+                    describe.each(zipped)('when method returns %p', (value, msg) => {
+                        beforeEach(() => {
+                            discordCommand.sendMessage.mockClear();
+                            serverQueue.queue.mockReturnValue(value);
+                            callback();
+                        });
+                        it('should send a the correct message', () => {
+                            expect(discordCommand.sendMessage).toHaveBeenCalledWith(msg);
+                        });
                     });
                 });
             });
@@ -443,24 +456,32 @@ describe('HELPER: executeCommand', () => {
                     callback = runGroupCommand.mock.calls[0][1];
                     callback();
                 });
-                it('should call serverQueue.dequeue with the serverId and parentId', () => {
-                    expect(serverQueue.dequeue).toHaveBeenCalledWith('serverId', 'parentId');
+                it('should call runCommandIfActive with correct arguments', () => {
+                    expect(runCommandIfActive).toHaveBeenCalledWith({ serverQueue, discordCommand }, expect.any(Function));
                 });
-                const cases = ['user', null];
-                const strings = [messages.DEQUEUE_SUCCESS, messages.DEQUEUE_EMPTY];
-                const zipped = cases.map((val, ind) => [val, strings[ind]]);
-                describe.each(zipped)('when method returns %p', (value, msg) => {
+                describe('runCommandIfActive callback', () => {
                     beforeEach(() => {
-                        discordCommand.sendMessage.mockClear();
-                        serverQueue.dequeue.mockReturnValue(value);
+                        callback = runCommandIfActive.mock.calls[0][1];
                         callback();
                     });
-                    it('should print the correct message', () => {
-                        expect(discordCommand.sendMessage).toHaveBeenCalledWith(msg);
+                    it('should call serverQueue.dequeue with the serverId and parentId', () => {
+                        expect(serverQueue.dequeue).toHaveBeenCalledWith('serverId', 'parentId');
+                    });
+                    const cases = ['user', null];
+                    const strings = [messages.DEQUEUE_SUCCESS, messages.DEQUEUE_EMPTY];
+                    const zipped = cases.map((val, ind) => [val, strings[ind]]);
+                    describe.each(zipped)('when method returns %p', (value, msg) => {
+                        beforeEach(() => {
+                            discordCommand.sendMessage.mockClear();
+                            serverQueue.dequeue.mockReturnValue(value);
+                            callback();
+                        });
+                        it('should print the correct message', () => {
+                            expect(discordCommand.sendMessage).toHaveBeenCalledWith(msg);
+                        });
                     });
                 });
             });
-
         });
         describe('when command is remove', () => {
             let callback;
@@ -478,20 +499,29 @@ describe('HELPER: executeCommand', () => {
                     callback = runGroupCommand.mock.calls[0][1];
                     callback();
                 });
-                it('should call serverQueue.dequeue with the serverId and student', () => {
-                    expect(serverQueue.remove).toHaveBeenCalledWith('serverId', 'student');
+                it('should call runCommandIfActive with correct arguments', () => {
+                    expect(runCommandIfActive).toHaveBeenCalledWith({ serverQueue, discordCommand }, expect.any(Function));
                 });
-                const cases = [true, false];
-                const strings = [messages.REMOVE_SUCCESS, messages.REMOVE_NOT_FOUND];
-                const zipped = cases.map((val, ind) => [val, strings[ind]]);
-                describe.each(zipped)('when method returns %p', (value, msg) => {
+                describe('runCommandIfActive callback', () => {
                     beforeEach(() => {
-                        discordCommand.sendMessage.mockClear();
-                        serverQueue.remove.mockReturnValue(value);
+                        callback = runCommandIfActive.mock.calls[0][1];
                         callback();
                     });
-                    it('should print the correct message', () => {
-                        expect(discordCommand.sendMessage).toHaveBeenCalledWith(msg);
+                    it('should call serverQueue.dequeue with the serverId and student', () => {
+                        expect(serverQueue.remove).toHaveBeenCalledWith('serverId', 'student');
+                    });
+                    const cases = [true, false];
+                    const strings = [messages.REMOVE_SUCCESS, messages.REMOVE_NOT_FOUND];
+                    const zipped = cases.map((val, ind) => [val, strings[ind]]);
+                    describe.each(zipped)('when method returns %p', (value, msg) => {
+                        beforeEach(() => {
+                            discordCommand.sendMessage.mockClear();
+                            serverQueue.remove.mockReturnValue(value);
+                            callback();
+                        });
+                        it('should print the correct message', () => {
+                            expect(discordCommand.sendMessage).toHaveBeenCalledWith(msg);
+                        });
                     });
                 });
             });

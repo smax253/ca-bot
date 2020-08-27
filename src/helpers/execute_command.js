@@ -3,6 +3,7 @@ const runAuthorizedCommand = require('./run_authorized_command');
 const checkArgs = require('./check_args');
 const showServer = require('./show_server');
 const runGroupCommand = require('./run_group_command');
+const runCommandIfActive = require('./run_command_if_active');
 
 const executeCommand = ({
     serverQueue,
@@ -74,35 +75,40 @@ const executeCommand = ({
         break;
     case 'queue':
         runGroupCommand({ serverQueue, discordCommand }, () => {
-            sendMessageWithBoolean({
-                result: serverQueue.queue(discordCommand.getServerId(), discordCommand.getParentId(), discordCommand.getAuthor()),
-                discordCommand,
-                trueMessage: messages.QUEUE_SUCCESS,
-                falseMessage: messages.QUEUE_ALREADY_QUEUED,
+            runCommandIfActive({ serverQueue, discordCommand }, () => {
+                sendMessageWithBoolean({
+                    result: serverQueue.queue(discordCommand.getServerId(), discordCommand.getParentId(), discordCommand.getAuthor()),
+                    discordCommand,
+                    trueMessage: messages.QUEUE_SUCCESS,
+                    falseMessage: messages.QUEUE_ALREADY_QUEUED,
+                });
             });
         });
-
         break;
     case 'dequeue':
         runGroupCommand({ serverQueue, discordCommand }, () => {
-            sendMessageWithBoolean({
-                result: serverQueue.dequeue(discordCommand.getServerId(), discordCommand.getParentId()),
-                discordCommand,
-                trueMessage: messages.DEQUEUE_SUCCESS,
-                falseMessage: messages.DEQUEUE_EMPTY,
+            runCommandIfActive({ serverQueue, discordCommand }, () => {
+                sendMessageWithBoolean({
+                    result: serverQueue.dequeue(discordCommand.getServerId(), discordCommand.getParentId()),
+                    discordCommand,
+                    trueMessage: messages.DEQUEUE_SUCCESS,
+                    falseMessage: messages.DEQUEUE_EMPTY,
+                });
             });
+
         });
         break;
     case 'remove':
         runGroupCommand({ serverQueue, discordCommand }, () => {
-            sendMessageWithBoolean({
-                result: serverQueue.remove(discordCommand.getServerId(), discordCommand.getAuthor()),
-                discordCommand,
-                trueMessage: messages.REMOVE_SUCCESS,
-                falseMessage: messages.REMOVE_NOT_FOUND,
+            runCommandIfActive({ serverQueue, discordCommand }, () => {
+                sendMessageWithBoolean({
+                    result: serverQueue.remove(discordCommand.getServerId(), discordCommand.getAuthor()),
+                    discordCommand,
+                    trueMessage: messages.REMOVE_SUCCESS,
+                    falseMessage: messages.REMOVE_NOT_FOUND,
+                });
             });
         });
-
         break;
     }
 };
