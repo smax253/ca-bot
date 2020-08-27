@@ -2,6 +2,7 @@ const messages = require('../locale/messages');
 const runAuthorizedCommand = require('./run_authorized_command');
 const checkArgs = require('./check_args');
 const showServer = require('./show_server');
+const runGroupCommand = require('./run_group_command');
 
 const executeCommand = ({
     serverQueue,
@@ -60,7 +61,7 @@ const executeCommand = ({
         break;
     case 'start':
         runAuthorizedCommand({ serverQueue, discordCommand }, () => {
-            if (serverQueue.isGroup(discordCommand.getServerId(), discordCommand.getParentId())) {
+            runGroupCommand({ serverQueue, discordCommand }, () => {
                 if (serverQueue.initQueue(discordCommand.getServerId(), discordCommand.getParentId())) {
                     showServer({ parentCategoryServer: discordCommand.getParent() });
                     discordCommand.sendMessage(messages.OFFICE_HOURS_STARTED);
@@ -68,36 +69,40 @@ const executeCommand = ({
                 else {
                     discordCommand.sendMessage(messages.OFFICE_HOURS_ALREADY_STARTED);
                 }
-            }
-            else{
-                discordCommand.sendMessage(messages.OFFICE_HOURS_WRONG_CHANNEL);
-            }
-
+            });
         });
         break;
     case 'queue':
-        sendMessageWithBoolean({
-            result: serverQueue.queue(discordCommand.getServerId(), discordCommand.getAuthor()),
-            discordCommand,
-            trueMessage: messages.QUEUE_SUCCESS,
-            falseMessage: messages.QUEUE_ALREADY_QUEUED,
+        runGroupCommand({ serverQueue, discordCommand }, () => {
+            sendMessageWithBoolean({
+                result: serverQueue.queue(discordCommand.getServerId(), discordCommand.getParentId(), discordCommand.getAuthor()),
+                discordCommand,
+                trueMessage: messages.QUEUE_SUCCESS,
+                falseMessage: messages.QUEUE_ALREADY_QUEUED,
+            });
         });
+
         break;
     case 'dequeue':
-        sendMessageWithBoolean({
-            result: serverQueue.dequeue(discordCommand.getServerId()),
-            discordCommand,
-            trueMessage: messages.DEQUEUE_SUCCESS,
-            falseMessage: messages.DEQUEUE_EMPTY,
+        runGroupCommand({ serverQueue, discordCommand }, () => {
+            sendMessageWithBoolean({
+                result: serverQueue.dequeue(discordCommand.getServerId(), discordCommand.getParentId()),
+                discordCommand,
+                trueMessage: messages.DEQUEUE_SUCCESS,
+                falseMessage: messages.DEQUEUE_EMPTY,
+            });
         });
         break;
     case 'remove':
-        sendMessageWithBoolean({
-            result: serverQueue.remove(discordCommand.getServerId(), discordCommand.getAuthor()),
-            discordCommand,
-            trueMessage: messages.REMOVE_SUCCESS,
-            falseMessage: messages.REMOVE_NOT_FOUND,
+        runGroupCommand({ serverQueue, discordCommand }, () => {
+            sendMessageWithBoolean({
+                result: serverQueue.remove(discordCommand.getServerId(), discordCommand.getAuthor()),
+                discordCommand,
+                trueMessage: messages.REMOVE_SUCCESS,
+                falseMessage: messages.REMOVE_NOT_FOUND,
+            });
         });
+
         break;
     }
 };
