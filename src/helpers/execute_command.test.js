@@ -5,13 +5,16 @@ const isAuthorized = require('./is_authorized');
 jest.mock('./check_args');
 const checkArgs = require('./check_args');
 
-
 jest.mock('../helpers/show_server');
 const showServer = require('../helpers/show_server');
+
+jest.mock('./run_group_command');
+const runGroupCommand = require('./run_group_command');
 
 describe('HELPER: executeCommand', () => {
     let serverQueue, discordCommand, client;
     beforeEach(() => {
+        runGroupCommand.mockImplementation(() => {});
         client = {
             on: jest.fn(),
             login: jest.fn(),
@@ -320,66 +323,56 @@ describe('HELPER: executeCommand', () => {
         });
         describe('when isAuthorized returns true', () => {
             beforeEach(() => {
+                runGroupCommand.mockClear();
                 isAuthorized.mockReturnValue(true);
                 executeCommand({
                     serverQueue, discordCommand,
                 });
             });
             it('calls serverQueue.isGroup with the serverId and the parentId', () => {
-                expect(serverQueue.isGroup).toHaveBeenCalledWith('serverId', 'parentId');
+                expect(runGroupCommand).toHaveBeenCalledWith({ serverQueue, discordCommand }, expect.any(Function));
             });
-            describe('if text channel is in a group', () => {
+            describe('callback', () => {
+                let callback;
                 beforeEach(() => {
-                    serverQueue.isGroup.mockReturnValue(true);
-                    executeCommand({
-                        serverQueue, discordCommand,
-                    });
+                    callback = runGroupCommand.mock.calls[0][1];
                 });
-                it('should call serverQueue.initQueue with the serverId and the groupId', () => {
-                    expect(serverQueue.initQueue).toHaveBeenCalledWith('serverId', 'parentId');
-                });
-                describe('when initQueue returns true', () => {
+                describe('if text channel is in a group', () => {
                     beforeEach(() => {
-                        discordCommand.sendMessage.mockClear();
-                        serverQueue.initQueue.mockReturnValue(true);
-                        executeCommand({
-                            serverQueue, discordCommand,
+                        serverQueue.isGroup.mockReturnValue(true);
+                        callback();
+                    });
+                    it('should call serverQueue.initQueue with the serverId and the groupId', () => {
+                        expect(serverQueue.initQueue).toHaveBeenCalledWith('serverId', 'parentId');
+                    });
+                    describe('when initQueue returns true', () => {
+                        beforeEach(() => {
+                            discordCommand.sendMessage.mockClear();
+                            serverQueue.initQueue.mockReturnValue(true);
+                            callback();
+                        });
+                        it('calls showServer helper with the parent channel', () => {
+                            expect(showServer).toHaveBeenCalledWith({
+                                parentCategoryServer: 'parent',
+                            });
+                        });
+                        it('prints a message that office hours have started', () => {
+                            expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.OFFICE_HOURS_STARTED);
                         });
                     });
-                    it('calls showServer helper with the parent channel', () => {
-                        expect(showServer).toHaveBeenCalledWith({
-                            parentCategoryServer: 'parent',
+                    describe('when initQueue returns false', () => {
+                        beforeEach(() => {
+                            discordCommand.sendMessage.mockClear();
+                            serverQueue.initQueue.mockReturnValue(false);
+                            callback();
                         });
-                    });
-                    it('prints a message that office hours have started', () => {
-                        expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.OFFICE_HOURS_STARTED);
-                    });
-                });
-                describe('when initQueue returns false', () => {
-                    beforeEach(() => {
-                        discordCommand.sendMessage.mockClear();
-                        serverQueue.initQueue.mockReturnValue(false);
-                        executeCommand({
-                            serverQueue, discordCommand,
+                        it('should send an already started message', () => {
+                            expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.OFFICE_HOURS_ALREADY_STARTED);
                         });
-                    });
-                    it('should send an already started message', () => {
-                        expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.OFFICE_HOURS_ALREADY_STARTED);
                     });
                 });
             });
-            describe('if text channel is not in a group', () => {
-                beforeEach(() => {
-                    discordCommand.sendMessage.mockClear();
-                    serverQueue.isGroup.mockReturnValue(false);
-                    executeCommand({
-                        serverQueue, discordCommand,
-                    });
-                });
-                it('should send a wrong channel message', () => {
-                    expect(discordCommand.sendMessage).toHaveBeenCalledWith(messages.OFFICE_HOURS_WRONG_CHANNEL);
-                });
-            });
+
         });
         describe('when isAuthorized returns false', () => {
             beforeEach(() => {
@@ -395,84 +388,114 @@ describe('HELPER: executeCommand', () => {
         });
     });
     describe('queue manipulation commands', () => {
+        beforeEach(() => {
+            runGroupCommand.mockClear();
+        });
         describe('when command is queue', () => {
+            let callback;
             beforeEach(() => {
                 discordCommand.getCommand = jest.fn().mockReturnValue('queue');
                 executeCommand({
                     serverQueue, discordCommand,
                 });
+
             });
-            it('should call serverQueue.queue with the serverId and student', () => {
-                expect(serverQueue.queue).toHaveBeenCalledWith('serverId', 'student');
+            it('calls runGroupCommand with the correct arguments', () => {
+                expect(runGroupCommand).toHaveBeenCalledWith({ serverQueue, discordCommand }, expect.any(Function));
             });
-            const cases = [true, false];
-            const strings = [messages.QUEUE_SUCCESS, messages.QUEUE_ALREADY_QUEUED];
-            const zipped = cases.map((val, ind) => [val, strings[ind]]);
-            describe.each(zipped)('when method returns %p', (value, msg) => {
+            describe('runGroupCommand callback', () => {
                 beforeEach(() => {
-                    discordCommand.sendMessage.mockClear();
-                    serverQueue.queue.mockReturnValue(value);
-                    executeCommand({
-                        serverQueue, discordCommand,
+                    callback = runGroupCommand.mock.calls[0][1];
+                    callback();
+                });
+                it('should call serverQueue.queue with the serverId, groupId, and student', () => {
+                    expect(serverQueue.queue).toHaveBeenCalledWith('serverId', 'parentId', 'student');
+                });
+                const cases = [true, false];
+                const strings = [messages.QUEUE_SUCCESS, messages.QUEUE_ALREADY_QUEUED];
+                const zipped = cases.map((val, ind) => [val, strings[ind]]);
+                describe.each(zipped)('when method returns %p', (value, msg) => {
+                    beforeEach(() => {
+                        discordCommand.sendMessage.mockClear();
+                        serverQueue.queue.mockReturnValue(value);
+                        callback();
+                    });
+                    it('should send a the correct message', () => {
+                        expect(discordCommand.sendMessage).toHaveBeenCalledWith(msg);
                     });
                 });
-                it('should send a the correct message', () => {
-                    expect(discordCommand.sendMessage).toHaveBeenCalledWith(msg);
-                });
             });
+
         });
         describe('when command is dequeue', () => {
+            let callback;
             beforeEach(() => {
                 discordCommand.getCommand = jest.fn().mockReturnValue('dequeue');
                 executeCommand({
                     serverQueue, discordCommand,
                 });
             });
-            it('should call serverQueue.dequeue with the serverId', () => {
-                expect(serverQueue.dequeue).toHaveBeenCalledWith('serverId');
+            it('calls runGroupCommand with the correct arguments', () => {
+                expect(runGroupCommand).toHaveBeenCalledWith({ serverQueue, discordCommand }, expect.any(Function));
             });
-            const cases = ['user', null];
-            const strings = [messages.DEQUEUE_SUCCESS, messages.DEQUEUE_EMPTY];
-            const zipped = cases.map((val, ind) => [val, strings[ind]]);
-            describe.each(zipped)('when method returns %p', (value, msg) => {
+            describe('runGroupCommand callback', () => {
                 beforeEach(() => {
-                    discordCommand.sendMessage.mockClear();
-                    serverQueue.dequeue.mockReturnValue(value);
-                    executeCommand({
-                        serverQueue, discordCommand,
+                    callback = runGroupCommand.mock.calls[0][1];
+                    callback();
+                });
+                it('should call serverQueue.dequeue with the serverId and parentId', () => {
+                    expect(serverQueue.dequeue).toHaveBeenCalledWith('serverId', 'parentId');
+                });
+                const cases = ['user', null];
+                const strings = [messages.DEQUEUE_SUCCESS, messages.DEQUEUE_EMPTY];
+                const zipped = cases.map((val, ind) => [val, strings[ind]]);
+                describe.each(zipped)('when method returns %p', (value, msg) => {
+                    beforeEach(() => {
+                        discordCommand.sendMessage.mockClear();
+                        serverQueue.dequeue.mockReturnValue(value);
+                        callback();
+                    });
+                    it('should print the correct message', () => {
+                        expect(discordCommand.sendMessage).toHaveBeenCalledWith(msg);
                     });
                 });
-                it('should print the correct message', () => {
-                    expect(discordCommand.sendMessage).toHaveBeenCalledWith(msg);
-                });
             });
+
         });
         describe('when command is remove', () => {
+            let callback;
             beforeEach(() => {
                 discordCommand.getCommand = jest.fn().mockReturnValue('remove');
                 executeCommand({
                     serverQueue, discordCommand,
                 });
             });
-            it('should call serverQueue.dequeue with the serverId and student', () => {
-                expect(serverQueue.remove).toHaveBeenCalledWith('serverId', 'student');
+            it('calls runGroupCommand with the correct arguments', () => {
+                expect(runGroupCommand).toHaveBeenCalledWith({ serverQueue, discordCommand }, expect.any(Function));
             });
-            const cases = [true, false];
-            const strings = [messages.REMOVE_SUCCESS, messages.REMOVE_NOT_FOUND];
-            const zipped = cases.map((val, ind) => [val, strings[ind]]);
-            describe.each(zipped)('when method returns %p', (value, msg) => {
+            describe('runGroupCommand callback', () => {
                 beforeEach(() => {
-                    discordCommand.sendMessage.mockClear();
-                    serverQueue.remove.mockReturnValue(value);
-                    executeCommand({
-                        serverQueue, discordCommand,
+                    callback = runGroupCommand.mock.calls[0][1];
+                    callback();
+                });
+                it('should call serverQueue.dequeue with the serverId and student', () => {
+                    expect(serverQueue.remove).toHaveBeenCalledWith('serverId', 'student');
+                });
+                const cases = [true, false];
+                const strings = [messages.REMOVE_SUCCESS, messages.REMOVE_NOT_FOUND];
+                const zipped = cases.map((val, ind) => [val, strings[ind]]);
+                describe.each(zipped)('when method returns %p', (value, msg) => {
+                    beforeEach(() => {
+                        discordCommand.sendMessage.mockClear();
+                        serverQueue.remove.mockReturnValue(value);
+                        callback();
+                    });
+                    it('should print the correct message', () => {
+                        expect(discordCommand.sendMessage).toHaveBeenCalledWith(msg);
                     });
                 });
-                it('should print the correct message', () => {
-                    expect(discordCommand.sendMessage).toHaveBeenCalledWith(msg);
-                });
             });
+
         });
     });
-
 });
