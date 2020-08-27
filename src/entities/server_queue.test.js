@@ -407,17 +407,41 @@ describe('ENTITY: ServerQueue', () => {
                 });
             });
         });
+        describe('isActive()', () => {
+            let result;
+            beforeEach(() => {
+                instance.servers.serverId1.groups[0].queue = [];
+            });
+            describe('when called with a server and group that is not active', () => {
+                beforeEach(() => {
+                    result = instance.isActive('serverId1', 'group2');
+                });
+                it('should return false', () => {
+                    expect(result).toEqual(false);
+                });
+            });
+            describe('when called with a server that is active', () => {
+                beforeEach(() => {
+                    result = instance.isActive('serverId1', 'group1');
+                });
+                it('should return true', () => {
+                    expect(result).toEqual(true);
+                });
+            });
+        });
         describe('queue related operations', () => {
             beforeEach(() => {
                 instance.servers = {
                     serverId1: {
-                        queue:
-                        [
+                        admin_roles: ['admin1', 'admin2'],
+                        groups: [
                             {
-                                id:'student1',
-                            },
-                            {
-                                id: 'student2',
+                                id: 'group1',
+                                queue: [{
+                                    id: 'student1',
+                                }, {
+                                    id: 'student2',
+                                }],
                             },
                         ],
                     },
@@ -427,21 +451,18 @@ describe('ENTITY: ServerQueue', () => {
                 describe('when student is already in queue', () => {
                     let result;
                     beforeEach(() => {
-                        result = instance.queue('serverId1', { id:'student1' });
+                        result = instance.queue('serverId1', 'group1', { id:'student1' });
                     });
                     it('should not modify the queue', () => {
-                        expect(instance.servers).toEqual({
-                            serverId1: {
-                                queue: [
-                                    {
-                                        id:'student1',
-                                    },
-                                    {
-                                        id: 'student2',
-                                    },
-                                ],
-                            },
-                        });
+                        expect(instance.servers.serverId1.groups[0].queue).toEqual(
+                            [
+                                {
+                                    id:'student1',
+                                },
+                                {
+                                    id: 'student2',
+                                },
+                            ]);
                     });
                     it('should return false', () => {
                         expect(result).toEqual(false);
@@ -450,22 +471,21 @@ describe('ENTITY: ServerQueue', () => {
                 describe('when student is not in queue', () => {
                     let result;
                     beforeEach(() => {
-                        result = instance.queue('serverId1', { id:'student3' });
+                        result = instance.queue('serverId1', 'group1', { id:'student3' });
                     });
                     it('should put the student in the back of the queue', () => {
-                        expect(instance.servers).toEqual({
-                            serverId1: {
-                                queue: [
-                                    {
-                                        id:'student1',
-                                    },
-                                    {
-                                        id: 'student2',
-                                    },
-                                    { id:'student3' },
-                                ],
-                            },
-                        });
+                        expect(instance.servers.serverId1.groups[0].queue).toEqual(
+                            [
+                                {
+                                    id:'student1',
+                                },
+                                {
+                                    id: 'student2',
+                                },
+                                {
+                                    id: 'student3',
+                                },
+                            ]);
                     });
                     it('should return true', () => {
                         expect(result).toEqual(true);
@@ -476,16 +496,15 @@ describe('ENTITY: ServerQueue', () => {
                 describe('when there is a student in queue', () => {
                     let result;
                     beforeEach(() => {
-                        result = instance.dequeue('serverId1');
+                        result = instance.dequeue('serverId1', 'group1');
                     });
                     it('should removes from the front of the queue', () => {
-                        expect(instance.servers).toEqual({
-                            serverId1: {
-                                queue: [{
+                        expect(instance.servers.serverId1.groups[0].queue).toEqual(
+                            [
+                                {
                                     id: 'student2',
-                                }],
-                            },
-                        });
+                                },
+                            ]);
                     });
                     it('should return the dequeued student', () => {
                         expect(result).toEqual({
@@ -498,17 +517,19 @@ describe('ENTITY: ServerQueue', () => {
                     beforeEach(() => {
                         instance.servers = {
                             serverId1: {
-                                queue: [],
+                                admin_roles: ['admin1', 'admin2'],
+                                groups: [
+                                    {
+                                        id: 'group1',
+                                        queue: [],
+                                    },
+                                ],
                             },
                         };
-                        result = instance.dequeue('serverId1');
+                        result = instance.dequeue('serverId1', 'group1');
                     });
                     it('does not modify the queue', () => {
-                        expect(instance.servers).toEqual({
-                            serverId1: {
-                                queue: [],
-                            },
-                        });
+                        expect(instance.servers.serverId1.groups[0].queue).toEqual([]);
                     });
                     it('should return null', () => {
                         expect(result).toEqual(null);
@@ -519,19 +540,18 @@ describe('ENTITY: ServerQueue', () => {
                 describe('when the student is not in queue', () => {
                     let result;
                     beforeEach(() => {
-                        result = instance.remove('serverId1', { id:'student3' });
+                        result = instance.remove('serverId1', 'group1', { id:'student3' });
                     });
                     it('does not modify the queue', () => {
-                        expect(instance.servers).toEqual({
-                            serverId1: {
-                                queue: [{
-                                    id:'student1',
+                        expect(instance.servers.serverId1.groups[0].queue).toEqual(
+                            [
+                                {
+                                    id: 'student1',
                                 },
                                 {
                                     id: 'student2',
-                                }],
-                            },
-                        });
+                                },
+                            ]);
                     });
                     it('should return true', () => {
                         expect(result).toEqual(false);
@@ -540,16 +560,15 @@ describe('ENTITY: ServerQueue', () => {
                 describe('when the student is in queue', () => {
                     let result;
                     beforeEach(() => {
-                        result = instance.remove('serverId1', { id:'student2' });
+                        result = instance.remove('serverId1', 'group1', { id:'student2' });
                     });
                     it('removes the student from the queue', () => {
-                        expect(instance.servers).toEqual({
-                            serverId1: {
-                                queue: [{
-                                    id:'student1',
-                                }],
-                            },
-                        });
+                        expect(instance.servers.serverId1.groups[0].queue).toEqual(
+                            [
+                                {
+                                    id: 'student1',
+                                },
+                            ]);
                     });
                     it('should return true', () => {
                         expect(result).toEqual(true);

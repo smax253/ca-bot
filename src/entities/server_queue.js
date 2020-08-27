@@ -49,8 +49,10 @@ class ServerQueue {
         return true;
     }
 
-    queue(serverId, student) {
-        const queue = this.servers[serverId].queue;
+    queue(serverId, groupId, student) {
+        const groups = this.servers[serverId].groups;
+        const queue = groups.find(group => group.id === groupId).queue;
+
         if (queue.find(matchStudentIds(student))) {
             return false;
         }
@@ -60,14 +62,18 @@ class ServerQueue {
         }
     }
 
-    dequeue(serverId) {
-        const queue = this.servers[serverId].queue;
+    dequeue(serverId, groupId) {
+        const groups = this.servers[serverId].groups;
+        const queue = groups.find(group => group.id === groupId).queue;
+
         if(queue.length === 0) return null;
         else return queue.shift();
     }
 
-    remove(serverId, student) {
-        const queue = this.servers[serverId].queue;
+    remove(serverId, groupId, student) {
+        const groups = this.servers[serverId].groups;
+        const queue = groups.find(group => group.id === groupId).queue;
+
         const ind = queue.findIndex(matchStudentIds(student));
         if (ind < 0) {
             return false;
@@ -132,6 +138,10 @@ class ServerQueue {
             console.error('Error in createRoom(): '.concat(error));
             return false;
         });
+    }
+    isActive(serverId, groupId) {
+        const group = this.servers[serverId].groups.find(office => office.id === groupId);
+        return !!group.queue;
     }
 }
 
