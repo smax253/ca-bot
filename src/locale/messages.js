@@ -20,5 +20,7 @@ const messages = {
     OFFICE_HOURS_ALREADY_STARTED: 'Office hours have already started!',
     OFFICE_HOURS_WRONG_CHANNEL: 'Please run this command in an office hours group.',
     OFFICE_HOURS_NOT_ACTIVE: 'Office hours are not currently running!',
+    OFFICE_HOURS_STOPPED: 'Office hours have stopped.',
+    UNKNOWN_ERROR: 'Unknown error occurred!',
 };
 module.exports = messages;

@@ -291,7 +291,7 @@ describe('ENTITY: ServerQueue', () => {
                                 },
                                 {
                                     id: 'self',
-                                    allow: ['VIEW_CHANNEL'],
+                                    allow: ['VIEW_CHANNEL', 'MANAGE_ROLES', 'MANAGE_CHANNELS'],
                                 },
                             ],
                         });
@@ -405,6 +405,30 @@ describe('ENTITY: ServerQueue', () => {
                 it('should return false', () => {
                     expect(result).toEqual(false);
                 });
+            });
+        });
+        describe('stopQueue()', () => {
+            let result;
+            describe('when queue is already initalized', () => {
+                beforeEach(() => {
+                    instance.servers.serverId1.groups[1].queue = [];
+                    result = instance.stopQueue('serverId1', 'group2');
+                });
+                it('sets the queue to undefined', () => {
+                    expect(instance.servers.serverId1.groups[1].queue).toEqual(undefined);
+                });
+                it('returns an empty array (TO BE USED LATED FOR ATTENDANCE)', () => {
+                    expect(result).toEqual([]);
+                });
+            });
+            describe('when queue is not initialized', () => {
+                beforeEach(() => {
+                    result = instance.stopQueue('serverId1', 'group1');
+                });
+                it('returns null', () => {
+                    expect(result).toEqual(null);
+                });
+
             });
         });
         describe('isActive()', () => {

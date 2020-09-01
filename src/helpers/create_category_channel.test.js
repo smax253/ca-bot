@@ -25,7 +25,7 @@ describe('HELPER: Create overarching category channel', () => {
                     },
                     {
                         id: 'selfRole',
-                        allow: ['VIEW_CHANNEL'],
+                        allow: ['VIEW_CHANNEL', 'MANAGE_ROLES', 'MANAGE_CHANNELS'],
                     },
                 ],
             },

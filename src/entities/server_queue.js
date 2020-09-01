@@ -118,6 +118,13 @@ class ServerQueue {
         targetGroup.queue = [];
         return true;
     }
+    stopQueue(serverId, groupId) {
+        const groups = this.servers[serverId].groups;
+        const targetGroup = groups.find(group => group.id === groupId);
+        if (!targetGroup.queue) return null;
+        targetGroup.queue = undefined;
+        return [];
+    }
     createRoom(serverId, roomName, channelManager, selfRole) {
         return createCategoryChannel({
             roomName, selfRole, channelManager,
