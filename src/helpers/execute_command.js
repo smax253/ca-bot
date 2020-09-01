@@ -4,6 +4,8 @@ const checkArgs = require('./check_args');
 const showServer = require('./show_server');
 const runGroupCommand = require('./run_group_command');
 const runCommandIfActive = require('./run_command_if_active');
+const hideServer = require('./hide_server');
+const handlePromiseWithMessage = require('./handle_promise_with_message');
 
 const executeCommand = ({
     serverQueue,
@@ -64,12 +66,36 @@ const executeCommand = ({
         runAuthorizedCommand({ serverQueue, discordCommand }, () => {
             runGroupCommand({ serverQueue, discordCommand }, () => {
                 if (serverQueue.initQueue(discordCommand.getServerId(), discordCommand.getParentId())) {
-                    showServer({ parentCategoryServer: discordCommand.getParent() });
-                    discordCommand.sendMessage(messages.OFFICE_HOURS_STARTED);
+                    handlePromiseWithMessage({
+                        promise: showServer({ parentCategoryServer: discordCommand.getParent() }),
+                        discordCommand,
+                        successMessage: messages.OFFICE_HOURS_STARTED,
+                        failureMessage: messages.UNKNOWN_ERROR,
+                    });
                 }
                 else {
                     discordCommand.sendMessage(messages.OFFICE_HOURS_ALREADY_STARTED);
                 }
+            });
+        });
+        break;
+    case 'stop':
+        runAuthorizedCommand({ serverQueue, discordCommand }, () => {
+            runGroupCommand({ serverQueue, discordCommand }, () => {
+                runCommandIfActive({ serverQueue, discordCommand }, () => {
+                    const users = serverQueue.stopQueue(discordCommand.getServerId(), discordCommand.getParentId());
+                    if (users) {
+                        handlePromiseWithMessage({
+                            promise: hideServer({ parentCategoryServer: discordCommand.getParent() }),
+                            discordCommand,
+                            successMessage: messages.OFFICE_HOURS_STOPPED,
+                            failureMessage: messages.UNKNOWN_ERROR,
+                        });
+                    }
+                    else{
+                        discordCommand.sendMessage(messages.OFFICE_HOURS_NOT_ACTIVE);
+                    }
+                });
             });
         });
         break;

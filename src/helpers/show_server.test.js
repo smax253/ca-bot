@@ -1,24 +1,24 @@
 const showServer = require('./show_server');
 
 describe('HELPER: showServer', () => {
-    let parent;
+    let parent, result;
     beforeEach(() => {
         parent = {
-            overwritePermissions: jest.fn(),
+            updateOverwrite: jest.fn(() => 'promise'),
             guild: {
                 roles: {
                     everyone: 'everyone',
                 },
             },
         };
-        showServer({ parentCategoryServer: parent });
+        result = showServer({ parentCategoryServer: parent });
     });
-    it('calls overwritePermissions to show category to everyone', () => {
-        expect(parent.overwritePermissions).toHaveBeenCalledWith([
-            {
-                id: 'everyone',
-                allow: ['VIEW_CHANNEL'],
-            },
-        ]);
+    it('calls updateOverwrite to show category to everyone', () => {
+        expect(parent.updateOverwrite).toHaveBeenCalledWith('everyone', {
+            VIEW_CHANNEL: true,
+        });
+    });
+    it('returns the promise', () => {
+        expect(result).toEqual('promise');
     });
 });

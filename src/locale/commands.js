@@ -11,6 +11,7 @@ module.exports = {
         r: 'remove',
         createroom: 'createroom',
         start: 'start',
+        stop: 'stop',
     },
     prefix: '!',
 };
