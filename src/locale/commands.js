@@ -1,7 +1,7 @@
 module.exports = {
     commands: {
-        q: 'queue',
         queue: 'queue',
+        q: 'queue',
         init: 'init',
         dequeue: 'dequeue',
         d: 'dequeue',
@@ -12,6 +12,7 @@ module.exports = {
         createroom: 'createroom',
         start: 'start',
         stop: 'stop',
+        help: 'help',
     },
     prefix: '!',
 };
