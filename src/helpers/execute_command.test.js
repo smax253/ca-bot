@@ -22,6 +22,7 @@ const handlePromiseWithMessage = require('./handle_promise_with_message');
 
 jest.mock('./generate_help_command');
 const generateHelpCommand = require('./generate_help_command');
+const parseMessage = require('./parse_message');
 
 describe('HELPER: executeCommand', () => {
     let serverQueue, discordCommand, client;
@@ -53,6 +54,7 @@ describe('HELPER: executeCommand', () => {
             stopQueue: jest.fn().mockReturnValue('stopQueueResult'),
         };
         discordCommand = {
+            getAuthorId: jest.fn().mockReturnValue('authorId'),
             getServer: jest.fn(),
             getServerId: jest.fn().mockReturnValue('serverId'),
             sendMessage: jest.fn(),
@@ -686,9 +688,12 @@ describe('HELPER: executeCommand', () => {
                         );
                     });
                     const cases = [true, false];
+                    const subs = {
+                        id: 'authorId',
+                    };
                     const strings = [
-                        messages.QUEUE_SUCCESS,
-                        messages.QUEUE_ALREADY_QUEUED,
+                        parseMessage(messages.QUEUE_SUCCESS, subs),
+                        parseMessage(messages.QUEUE_ALREADY_QUEUED, subs),
                     ];
                     const zipped = cases.map((val, ind) => [val, strings[ind]]);
                     describe.each(zipped)(
@@ -749,8 +754,11 @@ describe('HELPER: executeCommand', () => {
                         );
                     });
                     const cases = ['user', null];
+                    const subs = {
+                        target: 'user',
+                    };
                     const strings = [
-                        messages.DEQUEUE_SUCCESS,
+                        parseMessage(messages.DEQUEUE_SUCCESS, subs),
                         messages.DEQUEUE_EMPTY,
                     ];
                     const zipped = cases.map((val, ind) => [val, strings[ind]]);
@@ -806,13 +814,17 @@ describe('HELPER: executeCommand', () => {
                     it('should call serverQueue.dequeue with the serverId and student', () => {
                         expect(serverQueue.remove).toHaveBeenCalledWith(
                             'serverId',
+                            'parentId',
                             'student',
                         );
                     });
                     const cases = [true, false];
+                    const subs = {
+                        id: 'authorId',
+                    };
                     const strings = [
-                        messages.REMOVE_SUCCESS,
-                        messages.REMOVE_NOT_FOUND,
+                        parseMessage(messages.REMOVE_SUCCESS, subs),
+                        parseMessage(messages.REMOVE_NOT_FOUND, subs),
                     ];
                     const zipped = cases.map((val, ind) => [val, strings[ind]]);
                     describe.each(zipped)(
