@@ -25,9 +25,9 @@ describe('HELPER: resolve promise with messages', () => {
                 successMessage,
                 failureMessage,
             });
-            it('calls discordCommand.sendMessage with the success message', () => {
-                expect(discordCommand.sendMessage).toHaveBeenCalledWith(successMessage);
-            });
+        });
+        it('calls discordCommand.sendMessage with the success message', () => {
+            expect(discordCommand.sendMessage).toHaveBeenCalledWith(successMessage);
         });
     });
     describe('when promise rejects', () => {
