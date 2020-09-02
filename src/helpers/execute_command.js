@@ -7,9 +7,13 @@ const runCommandIfActive = require('./run_command_if_active');
 const hideServer = require('./hide_server');
 const handlePromiseWithMessage = require('./handle_promise_with_message');
 const generateHelpCommand = require('./generate_help_command');
+const parseMessage = require('./parse_message');
 
 const executeCommand = ({ serverQueue, discordCommand, client }) => {
     const command = discordCommand.getCommand();
+    const subs = {
+        id: discordCommand.getAuthorId(),
+    };
     switch (command) {
     case 'init':
         runAuthorizedCommand({ serverQueue, discordCommand }, () => {
@@ -139,8 +143,8 @@ const executeCommand = ({ serverQueue, discordCommand, client }) => {
                         discordCommand.getAuthor(),
                     ),
                     discordCommand,
-                    trueMessage: messages.QUEUE_SUCCESS,
-                    falseMessage: messages.QUEUE_ALREADY_QUEUED,
+                    trueMessage: parseMessage(messages.QUEUE_SUCCESS, subs),
+                    falseMessage: parseMessage(messages.QUEUE_ALREADY_QUEUED, subs),
                 });
             });
         });
@@ -148,13 +152,14 @@ const executeCommand = ({ serverQueue, discordCommand, client }) => {
     case 'dequeue':
         runGroupCommand({ serverQueue, discordCommand }, () => {
             runCommandIfActive({ serverQueue, discordCommand }, () => {
+                subs.target = serverQueue.dequeue(
+                    discordCommand.getServerId(),
+                    discordCommand.getParentId(),
+                );
                 sendMessageWithBoolean({
-                    result: serverQueue.dequeue(
-                        discordCommand.getServerId(),
-                        discordCommand.getParentId(),
-                    ),
+                    result: subs.target,
                     discordCommand,
-                    trueMessage: messages.DEQUEUE_SUCCESS,
+                    trueMessage: parseMessage(messages.DEQUEUE_SUCCESS, subs),
                     falseMessage: messages.DEQUEUE_EMPTY,
                 });
             });
@@ -166,11 +171,12 @@ const executeCommand = ({ serverQueue, discordCommand, client }) => {
                 sendMessageWithBoolean({
                     result: serverQueue.remove(
                         discordCommand.getServerId(),
+                        discordCommand.getParentId(),
                         discordCommand.getAuthor(),
                     ),
                     discordCommand,
-                    trueMessage: messages.REMOVE_SUCCESS,
-                    falseMessage: messages.REMOVE_NOT_FOUND,
+                    trueMessage: parseMessage(messages.REMOVE_SUCCESS, subs),
+                    falseMessage: parseMessage(messages.REMOVE_NOT_FOUND, subs),
                 });
             });
         });
