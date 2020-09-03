@@ -14,6 +14,7 @@ const DiscordCommand = function({
     this.getArgs = () => args;
     this.getIsCommand = () => isCommand;
     this.sendMessage = (msg) => message.channel.send(msg);
+    this.sendDM = (msg) => message.author.send(msg);
     this.getRoles = () => message.member.roles;
     this.getOwnerId = () => message.channel.guild.ownerID;
     this.getChannelManager = () => message.channel.guild.channels;
