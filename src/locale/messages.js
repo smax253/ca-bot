@@ -22,6 +22,6 @@ const messages = {
     OFFICE_HOURS_NOT_ACTIVE: 'Office hours are not currently running!',
     OFFICE_HOURS_STOPPED: 'Office hours have stopped.',
     UNKNOWN_ERROR: 'Unknown error occurred!',
-    SAFEGUARD_DM: 'Sliding in the DMs for answers, huh? I admire the hustle. Here you go, it is our little secret: <https://bit.ly/2EXtwog>',
+    DM: 'Sliding in the DMs for answers, huh? I admire the hustle. Here you go, it is our little secret: <https://bit.ly/2EXtwog>',
 };
 module.exports = messages;
