@@ -6,7 +6,7 @@
   "jest": {
     "collectCoverageFrom": [
       "**/*.js",
-      "!src/index.js",
+      "!**/index.js",
       "!/node_modules/",
       "!src/locale/*"
     ]
