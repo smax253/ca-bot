@@ -98,13 +98,13 @@ describe('ENTITY: ServerQueue', () => {
         beforeEach(() => {
             instance.servers = {
                 serverId1: {
-                    queue: ['queue1', 'queue2'],
                     admin_roles: ['admin1', 'admin2'],
                     groups: [
                         {
                             id: 'group1',
                         },
                         {
+                            queue: ['queue1', 'queue2'],
                             id: 'group2',
                         },
                     ],
@@ -431,14 +431,20 @@ describe('ENTITY: ServerQueue', () => {
 
             });
         });
-        describe('isActive()', () => {
+        describe('getQueue()', () => {
             let result;
             beforeEach(() => {
-                instance.servers.serverId1.groups[0].queue = [];
+                result = instance.getQueue('serverId1', 'group2');
             });
+            it('returns the queue from the given server and group', () => {
+                expect(result).toEqual(['queue1', 'queue2']);
+            });
+        });
+        describe('isActive()', () => {
+            let result;
             describe('when called with a server and group that is not active', () => {
                 beforeEach(() => {
-                    result = instance.isActive('serverId1', 'group2');
+                    result = instance.isActive('serverId1', 'group1');
                 });
                 it('should return false', () => {
                     expect(result).toEqual(false);
@@ -446,7 +452,7 @@ describe('ENTITY: ServerQueue', () => {
             });
             describe('when called with a server that is active', () => {
                 beforeEach(() => {
-                    result = instance.isActive('serverId1', 'group1');
+                    result = instance.isActive('serverId1', 'group2');
                 });
                 it('should return true', () => {
                     expect(result).toEqual(true);

@@ -17,7 +17,7 @@ const queue = ({
                 result: serverQueue.queue(
                     discordCommand.getServerId(),
                     discordCommand.getParentId(),
-                    discordCommand.getAuthor(),
+                    discordCommand.getMember(),
                 ),
                 discordCommand,
                 trueMessage: parseMessage(messages.QUEUE_SUCCESS, subs),

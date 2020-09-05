@@ -4,6 +4,7 @@ const commands = {
     dequeue: require('./dequeue'),
     help: require('./help'),
     init: require('./init'),
+    list: require('./list'),
     queue: require('./queue'),
     remove: require('./remove'),
     removeadmin: require('./removeadmin'),

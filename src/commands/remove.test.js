@@ -16,7 +16,7 @@ describe('COMMAND: remove', () => {
             getAuthorId: jest.fn().mockReturnValue('authorId'),
             getServerId: jest.fn().mockReturnValue('serverId'),
             getParentId: jest.fn().mockReturnValue('parentId'),
-            getAuthor: jest.fn().mockReturnValue('author'),
+            getMember: jest.fn().mockReturnValue('author'),
         };
         serverQueue = {
             remove: jest.fn().mockReturnValue('removeResult'),

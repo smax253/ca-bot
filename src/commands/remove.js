@@ -17,7 +17,7 @@ const remove = ({
                 result: serverQueue.remove(
                     discordCommand.getServerId(),
                     discordCommand.getParentId(),
-                    discordCommand.getAuthor(),
+                    discordCommand.getMember(),
                 ),
                 discordCommand,
                 trueMessage: parseMessage(messages.REMOVE_SUCCESS, subs),

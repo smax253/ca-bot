@@ -13,6 +13,7 @@ module.exports = {
         start: 'start',
         stop: 'stop',
         help: 'help',
+        list: 'list',
     },
     prefix: '!',
 };

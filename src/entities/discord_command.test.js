@@ -6,9 +6,6 @@ describe('ENTITY: DiscordCommand', () => {
         sendSpy = jest.fn();
         expected = {
             content: 'content',
-            author: {
-                id: 'author',
-            },
             server: {
                 id: 'guild',
                 ownerID: 'ownerID',
@@ -34,6 +31,11 @@ describe('ENTITY: DiscordCommand', () => {
             channelManager: 'channelManager',
             parent: 'parent',
             parentId: 'parentID',
+            displayName: 'displayName',
+            member: {
+                roles: 'roles',
+                displayName: 'displayName',
+            },
         };
         actual = new DiscordCommand({
             message: {
@@ -53,6 +55,7 @@ describe('ENTITY: DiscordCommand', () => {
                 },
                 member: {
                     roles: 'roles',
+                    displayName: 'displayName',
                 },
             },
             command: 'command',

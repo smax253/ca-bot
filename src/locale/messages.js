@@ -22,5 +22,7 @@ const messages = {
     OFFICE_HOURS_NOT_ACTIVE: 'Office hours are not currently running!',
     OFFICE_HOURS_STOPPED: 'Office hours have stopped.',
     UNKNOWN_ERROR: 'Unknown error occurred!',
+    QUEUE_LIST: '-\nThe current queue is: \n[queue]',
+    QUEUE_EMPTY: 'The queue is empty.',
 };
 module.exports = messages;
