@@ -8,6 +8,7 @@ jest.mock('../locale/commands', () => {
             d: 'dequeue',
             remove: 'remove',
             r: 'remove',
+            list: 'list',
         },
     };
 });
@@ -25,7 +26,8 @@ describe('LOCALE: generate help command', () => {
 (All commands are specific to an office hours group)
 $q,$queue: enters yourself into the queue to get help.
 $dequeue,$d: removes the first person from the queue. [admin]
-$remove,$r: removes yourself from the queue.`,
+$remove,$r: removes yourself from the queue.
+$list: lists the current queue.`,
         );
     });
 });

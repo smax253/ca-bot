@@ -5,7 +5,6 @@ const DiscordCommand = function({
     isCommand,
 }) {
     this.getContent = () => message.content;
-    this.getAuthor = () => message.author;
     this.getAuthorId = () => message.author.id;
     this.getServer = () => message.channel.guild;
     this.getServerId = () => message.channel.guild.id;
@@ -19,10 +18,11 @@ const DiscordCommand = function({
     this.getChannelManager = () => message.channel.guild.channels;
     this.getParentId = () => message.channel.parentID;
     this.getParent = () => message.channel.parent;
+    this.getDisplayName = () => message.member.displayName;
+    this.getMember = () => message.member;
     this.toObject = () => {
         return {
             content: this.getContent(),
-            author: this.getAuthor(),
             server: this.getServer(),
             command: this.getCommand(),
             args: this.getArgs(),
@@ -35,6 +35,8 @@ const DiscordCommand = function({
             channelManager: this.getChannelManager(),
             parentId: this.getParentId(),
             parent: this.getParent(),
+            displayName: this.getDisplayName(),
+            member: this.getMember(),
         };
     };
 };

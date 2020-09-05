@@ -150,6 +150,10 @@ class ServerQueue {
         const group = this.servers[serverId].groups.find(office => office.id === groupId);
         return !!group.queue;
     }
+    getQueue(serverId, groupId) {
+        const group = this.servers[serverId].groups.find(office => office.id === groupId);
+        return group.queue;
+    }
 }
 
 module.exports = ServerQueue;

@@ -15,7 +15,7 @@ describe('COMMAND: queue', () => {
             getAuthorId: jest.fn().mockReturnValue('authorId'),
             getServerId: jest.fn().mockReturnValue('serverId'),
             getParentId: jest.fn().mockReturnValue('parentId'),
-            getAuthor: jest.fn().mockReturnValue('author'),
+            getMember: jest.fn().mockReturnValue('author'),
         };
         serverQueue = {
             queue: jest.fn().mockReturnValue('queueResult'),
