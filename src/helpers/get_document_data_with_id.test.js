@@ -1,10 +1,13 @@
 const getDocDataWithId = require('./get_document_data_with_id');
 
 describe('HELPER: get Document Data with ID', () => {
-    let collectionRef, serverQueue;
+    let collectionRef, serverQueue, allDocumentsRef;
     beforeEach(() => {
+        allDocumentsRef = {
+            toArray: jest.fn(),
+        };
         collectionRef = {
-            listDocuments: jest.fn(),
+            find: jest.fn(() => allDocumentsRef),
         };
         serverQueue = {
             updateData: jest.fn(),
@@ -12,22 +15,16 @@ describe('HELPER: get Document Data with ID', () => {
     });
     describe('on Promise success', () => {
         beforeEach(() => {
-            collectionRef.listDocuments.mockReturnValue(
+            allDocumentsRef.toArray.mockReturnValue(
                 new Promise((resolve) => {
                     resolve([
                         {
-                            get: jest.fn().mockReturnValue(
-                                {
-                                    id: 'id1',
-                                    data: jest.fn().mockReturnValue('data1'),
-                                }),
+                            _id: 'id1',
+                            data: 'data1',
                         },
                         {
-                            get: jest.fn().mockReturnValue(
-                                {
-                                    id: 'id2',
-                                    data: jest.fn().mockReturnValue('data2'),
-                                }),
+                            _id: 'id2',
+                            data: 'data2',
                         },
                     ]);
                 }),
@@ -38,11 +35,17 @@ describe('HELPER: get Document Data with ID', () => {
             expect(serverQueue.updateData).toHaveBeenCalledWith([
                 {
                     id: 'id1',
-                    data: 'data1',
+                    data: {
+                        _id: 'id1',
+                        data: 'data1',
+                    },
                 },
                 {
                     id: 'id2',
-                    data: 'data2',
+                    data: {
+                        _id: 'id2',
+                        data: 'data2',
+                    },
                 },
             ]);
         });
@@ -50,7 +53,7 @@ describe('HELPER: get Document Data with ID', () => {
     describe('on Promise failure', () => {
         beforeEach(() => {
             console.error = jest.fn();
-            collectionRef.listDocuments.mockReturnValue(
+            allDocumentsRef.toArray.mockReturnValue(
                 new Promise((_, reject) => {
                     reject('error');
                 }),

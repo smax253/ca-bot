@@ -1,7 +1,7 @@
-const BlankServer = require('../constants/blank_server');
 jest.mock('../helpers/get_document_data_with_id');
 const getDocDataWithIdMock = require('../helpers/get_document_data_with_id');
 const ServerQueue = require('./server_queue');
+const blank_server = require('../constants/blank_server');
 
 describe('ENTITY: ServerQueue', () => {
     let instance, collectionRef, setSpy;
@@ -11,9 +11,8 @@ describe('ENTITY: ServerQueue', () => {
         jest.spyOn(ServerQueue.prototype, 'getData');
         jest.spyOn(ServerQueue.prototype, 'syncData');
         collectionRef = {
-            doc: jest.fn().mockReturnValue({
-                set: setSpy,
-            }),
+            findOneAndUpdate: jest.fn(),
+            insertOne: jest.fn(),
         };
         instance = new ServerQueue(collectionRef);
     });
@@ -88,9 +87,6 @@ describe('ENTITY: ServerQueue', () => {
                     },
                 ]);
             });
-            it('creates new empty queue', () => {
-                expect(instance.servers.serverId2.queue).toEqual([]);
-            });
         });
     });
 
@@ -113,7 +109,7 @@ describe('ENTITY: ServerQueue', () => {
         });
         describe('syncData()', () => {
             beforeEach(() => {
-                collectionRef.doc.mockClear();
+                collectionRef.findOneAndUpdate.mockClear();
                 setSpy.mockClear();
                 instance.servers.serverId1.admin_roles = ['newadminrole'];
                 instance.servers.serverId1.groups = {
@@ -121,13 +117,16 @@ describe('ENTITY: ServerQueue', () => {
                 };
                 instance.syncData('serverId1');
             });
-            it('calls collectionRef.doc with the serverId', () => {
-                expect(collectionRef.doc).toHaveBeenCalledWith('serverId1');
-            });
-            it('sets admin roles and groups in the document', () => {
-                expect(setSpy).toHaveBeenCalledWith({
-                    admin_roles: instance.servers.serverId1.admin_roles,
-                    groups: instance.servers.serverId1.groups,
+            it('calls collectionRef.findOneAndUpdate with the serverId and the updated data', () => {
+                expect(collectionRef.findOneAndUpdate).toHaveBeenCalledWith({
+                    _id: 'serverId1',
+                }, {
+                    $set: {
+                        groups: {
+                            private: 'newPrivate',
+                        },
+                        admin_roles: ['newadminrole'],
+                    },
                 });
             });
         });
@@ -148,11 +147,11 @@ describe('ENTITY: ServerQueue', () => {
                     instance.servers = {};
                     result = instance.initServer('serverId1');
                 });
-                it('should create a new document with the server name', () => {
-                    expect(collectionRef.doc).toHaveBeenCalledWith('serverId1');
-                });
-                it('should set the value of the document to a blank server initialization document', () => {
-                    expect(setSpy).toHaveBeenCalledWith(BlankServer);
+                it('should create a new document with the server name, and the blank server', () => {
+                    expect(collectionRef.insertOne).toHaveBeenCalledWith({
+                        _id: 'serverId1',
+                        ...blank_server,
+                    });
                 });
                 it('should call getData', () => {
                     expect(ServerQueue.prototype.getData).toHaveBeenCalled();

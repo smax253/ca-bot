@@ -1,11 +1,9 @@
 const getDocDataWithId = ({ collectionRef, serverQueue }) => {
-    collectionRef.listDocuments().then((documentList) => {
-        return Promise.all(documentList.map((documentRef) => documentRef.get()));
-    }).then(docSnapshots => {
+    collectionRef.find().toArray().then(docSnapshots => {
         const data = docSnapshots.map(doc => {
             return {
-                id: doc.id,
-                data: doc.data(),
+                id: doc._id,
+                data: doc,
             };
         });
         serverQueue.updateData(data);

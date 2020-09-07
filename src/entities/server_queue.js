@@ -18,9 +18,13 @@ class ServerQueue {
 
     syncData(serverId) {
         const server = this.servers[serverId];
-        this.collectionRef.doc(serverId).set({
-            groups: server.groups,
-            admin_roles: server.admin_roles,
+        this.collectionRef.findOneAndUpdate({
+            _id: serverId,
+        }, {
+            $set: {
+                groups: server.groups,
+                admin_roles: server.admin_roles,
+            },
         });
     }
 
@@ -30,7 +34,6 @@ class ServerQueue {
             if(!servers[server.id]) {
                 servers[server.id] = {
                     ...server.data,
-                    queue: [],
                 };
             }
             else{
@@ -44,7 +47,10 @@ class ServerQueue {
         if(this.servers[serverId]) {
             return false;
         }
-        this.collectionRef.doc(serverId).set(blank_server);
+        this.collectionRef.insertOne({
+            _id: serverId,
+            ...blank_server,
+        });
         this.getData();
         return true;
     }

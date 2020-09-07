@@ -1,3 +1,3 @@
 const setup = require('./setup');
 
-setup();
+setup().catch(reason => console.error(reason));

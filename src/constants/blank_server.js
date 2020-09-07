@@ -1,4 +1,4 @@
 module.exports = {
-    admin_groups: [],
+    admin_roles: [],
     groups: [],
 };
