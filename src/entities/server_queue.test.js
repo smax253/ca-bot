@@ -166,7 +166,15 @@ describe('ENTITY: ServerQueue', () => {
             let result;
             describe('when the role list does not have one of the roles in the admin list', () => {
                 beforeEach(() => {
-                    result = instance.isAdmin('serverId1', ['role1', 'role2', 'role3']);
+                    result = instance.isAdmin('serverId1', [
+                        {
+                            name: 'role1',
+                        }, {
+                            name: 'role2',
+                        }, {
+                            name: 'role3',
+                        },
+                    ]);
                 });
                 it('should return false', () => {
                     expect(result).toEqual(false);
@@ -174,7 +182,13 @@ describe('ENTITY: ServerQueue', () => {
             });
             describe('when the role list has one of hte roles in the admin list', () => {
                 beforeEach(() => {
-                    result = instance.isAdmin('serverId1', ['role1', 'admin1', 'role3']);
+                    result = instance.isAdmin('serverId1', [{
+                        name: 'role1',
+                    }, {
+                        name: 'admin1',
+                    }, {
+                        name: 'role3',
+                    }]);
                 });
                 it('should return true', () => {
                     expect(result).toEqual(true);

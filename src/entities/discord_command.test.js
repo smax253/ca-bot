@@ -26,14 +26,16 @@ describe('ENTITY: DiscordCommand', () => {
                 parentID: 'parentID',
                 parent: 'parent',
             },
-            roles: 'roles',
+            roles: 'rolelist',
             ownerId: 'ownerID',
             channelManager: 'channelManager',
             parent: 'parent',
             parentId: 'parentID',
             displayName: 'displayName',
             member: {
-                roles: 'roles',
+                roles: {
+                    cache: 'rolelist',
+                },
                 displayName: 'displayName',
             },
         };
@@ -54,7 +56,9 @@ describe('ENTITY: DiscordCommand', () => {
                     parent: 'parent',
                 },
                 member: {
-                    roles: 'roles',
+                    roles: {
+                        cache: 'rolelist',
+                    },
                     displayName: 'displayName',
                 },
             },

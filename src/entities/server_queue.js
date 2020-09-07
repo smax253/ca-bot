@@ -84,8 +84,9 @@ class ServerQueue {
         }
     }
     isAdmin(serverId, roleList) {
+        const roleNamesList = roleList.map(role => role.name);
         const server = this.servers[serverId];
-        const is_admin = server.admin_roles.map((role) => roleList.includes(role)).includes(true);
+        const is_admin = server.admin_roles.map((role) => roleNamesList.includes(role)).includes(true);
         return is_admin;
     }
     addAdmin(serverId, role) {
