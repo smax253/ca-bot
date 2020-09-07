@@ -11,6 +11,7 @@ module.exports = {
         r: 'remove',
         createroom: 'createroom',
         start: 'start',
+        status: 'status',
         stop: 'stop',
         help: 'help',
         list: 'list',

@@ -9,6 +9,7 @@ const commands = {
     remove: require('./remove'),
     removeadmin: require('./removeadmin'),
     start: require('./start'),
+    status: require('./status'),
     stop: require('./stop'),
 };
 

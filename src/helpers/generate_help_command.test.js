@@ -9,6 +9,7 @@ jest.mock('../locale/commands', () => {
             remove: 'remove',
             r: 'remove',
             list: 'list',
+            status: 'status',
         },
     };
 });
@@ -25,9 +26,11 @@ describe('LOCALE: generate help command', () => {
             `List of commands:
 (All commands are specific to an office hours group)
 $q,$queue: enters yourself into the queue to get help.
-$dequeue,$d: removes the first person from the queue. [admin]
 $remove,$r: removes yourself from the queue.
-$list: lists the current queue.`,
+$status: gets your position in the queue.
+$list: lists the current queue.
+[admin-only commands]:
+$dequeue,$d: removes the first person from the queue.`,
         );
     });
 });
